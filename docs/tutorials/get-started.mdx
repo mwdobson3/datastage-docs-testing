@@ -1,0 +1,117 @@
+---
+sidebar_position: 1
+title: Get Started with DataStage Anywhere
+description: Deploy and manage DataStage Remote Engines on Kubernetes
+---
+
+import TutorialChecklist from '@site/src/components/TutorialChecklist';
+
+# Get Started with DataStage Anywhere
+
+Deploy and manage DataStage Remote Engines on Kubernetes in minutes. This tutorial series will guide you through the complete setup process, from prerequisites to running your first DataStage job.
+
+<a href="/docs/tutorials/get-started/install-prerequisites" className="start-tutorial-btn">
+  Start Tutorial
+</a>
+
+## What You'll Learn
+
+In this tutorial series, you'll learn how to:
+
+- ✅ Install and configure prerequisites (kubectl, Helm, IBM Cloud CLI)
+- ✅ Deploy a DataStage Remote Engine on Kubernetes
+- ✅ Connect your Remote Engine to IBM Cloud Pak for Data
+- ✅ Run your first DataStage job on the Remote Engine
+- ✅ Monitor and troubleshoot your deployment
+
+## Tutorial Path
+
+<TutorialChecklist 
+  collectionId="get-started"
+  tutorials={[
+    {
+      id: 'install-prerequisites',
+      title: 'Install Prerequisites',
+      duration: '5 min',
+      path: '/docs/tutorials/get-started/install-prerequisites'
+    },
+    {
+      id: 'deploy-engine',
+      title: 'Deploy Remote Engine',
+      duration: '10 min',
+      path: '/docs/tutorials/get-started/deploy-engine'
+    },
+    {
+      id: 'connect-cloud-pak',
+      title: 'Connect to Cloud Pak for Data',
+      duration: '7 min',
+      path: '/docs/tutorials/get-started/connect-cloud-pak'
+    },
+    {
+      id: 'run-first-job',
+      title: 'Run Your First Job',
+      duration: '8 min',
+      path: '/docs/tutorials/get-started/run-first-job'
+    },
+    {
+      id: 'monitor-troubleshoot',
+      title: 'Monitor and Troubleshoot',
+      duration: '10 min',
+      path: '/docs/tutorials/get-started/monitor-troubleshoot'
+    }
+  ]}
+/>
+
+## Prerequisites
+
+Before starting this tutorial series, ensure you have:
+
+- **Kubernetes Cluster** - Access to EKS, AKS, GKE, or OpenShift
+- **Admin Access** - Ability to install software on your local machine
+- **IBM Cloud Pak for Data** - An active instance (trial or production)
+- **Basic Kubernetes Knowledge** - Familiarity with pods, deployments, and services
+
+:::tip Estimated Time
+The complete tutorial series takes approximately **40 minutes** to complete.
+:::
+
+## What is DataStage Anywhere?
+
+DataStage Anywhere allows you to deploy IBM DataStage Remote Engines on any Kubernetes cluster, enabling you to:
+
+- **Run DataStage jobs closer to your data** - Reduce latency and data transfer costs
+- **Scale independently** - Add compute resources without affecting Cloud Pak for Data
+- **Support hybrid architectures** - Process data in on-premises, cloud, or edge environments
+- **Maintain centralized governance** - Manage all engines from Cloud Pak for Data
+
+## Architecture Overview
+
+```
+┌─────────────────────────────────────┐
+│   IBM Cloud Pak for Data            │
+│   (Control Plane)                   │
+│   - Job Design                      │
+│   - Orchestration                   │
+│   - Monitoring                      │
+└──────────────┬──────────────────────┘
+               │
+               │ HTTPS/gRPC
+               │
+┌──────────────▼──────────────────────┐
+│   DataStage Remote Engine           │
+│   (Data Plane - Your K8s Cluster)   │
+│   - Job Execution                   │
+│   - Data Processing                 │
+│   - Local Data Access               │
+└─────────────────────────────────────┘
+```
+
+## Need Help?
+
+- 📚 [Full Documentation](/docs/intro)
+- 💬 [Community Forum](https://community.ibm.com/community/user/datamanagement/communities/community-home?CommunityKey=d0e6b7c0-e0e0-4e0e-0e0e-0e0e0e0e0e0e)
+- 🐛 [Report Issues](https://github.com/YOUR-GITHUB-USERNAME/datastage-docs-testing/issues)
+
+---
+
+Ready to get started? Click the button above or proceed to [Install Prerequisites](/docs/tutorials/get-started/install-prerequisites).
