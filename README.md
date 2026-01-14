@@ -1,2 +1,1 @@
-# datastage-docs-testing
-Testing GitHub pages
+# datastage-anywhere-docs

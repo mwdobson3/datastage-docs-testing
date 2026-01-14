@@ -1,0 +1,235 @@
+---
+sidebar_position: 1
+title: Install Prerequisites
+description: Install kubectl, Helm, and IBM Cloud CLI
+---
+
+import VideoEmbed from '@site/src/components/VideoEmbed';
+
+# Install Prerequisites
+
+⏱️ **Duration:** 5 minutes
+
+## Overview
+
+Before deploying DataStage Anywhere, you need to install and configure several prerequisites on your local machine and ensure access to a Kubernetes cluster.
+
+:::info What You'll Install
+- **kubectl** - Kubernetes command-line tool
+- **Helm** - Kubernetes package manager  
+- **IBM Cloud CLI** - For Cloud Pak for Data integration
+:::
+
+## Video Tutorial
+
+<VideoEmbed 
+  videoId="dQw4w9WgXcQ" 
+  platform="youtube"
+  title="Installing Prerequisites for DataStage Anywhere"
+/>
+
+:::tip
+You can follow along with the video or use the written instructions below.
+:::
+
+## Step 1: Install kubectl
+
+The Kubernetes command-line tool allows you to run commands against Kubernetes clusters.
+
+### macOS
+
+```bash
+brew install kubectl
+```
+
+### Linux
+
+```bash
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+```
+
+### Windows (PowerShell as Administrator)
+
+```powershell
+choco install kubernetes-cli
+```
+
+### Verify Installation
+
+```bash
+kubectl version --client
+```
+
+Expected output:
+```
+Client Version: v1.28.0
+Kustomize Version: v5.0.4-0.20230601165947-6ce0bf390ce3
+```
+
+## Step 2: Install Helm
+
+Helm is the package manager for Kubernetes, used to deploy the DataStage Remote Engine.
+
+### macOS
+
+```bash
+brew install helm
+```
+
+### Linux
+
+```bash
+curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+```
+
+### Windows
+
+```powershell
+choco install kubernetes-helm
+```
+
+### Verify Installation
+
+```bash
+helm version
+```
+
+Expected output:
+```
+version.BuildInfo{Version:"v3.13.0", GitCommit:"...", GitTreeState:"clean", GoVersion:"go1.21.0"}
+```
+
+## Step 3: Configure Kubernetes Access
+
+Ensure you can access your Kubernetes cluster. This step varies depending on your cloud provider.
+
+### Amazon EKS
+
+```bash
+aws eks update-kubeconfig --region us-east-1 --name your-cluster-name
+```
+
+### Azure AKS
+
+```bash
+az aks get-credentials --resource-group your-rg --name your-cluster-name
+```
+
+### Google GKE
+
+```bash
+gcloud container clusters get-credentials your-cluster-name --region us-central1
+```
+
+### Verify Cluster Access
+
+```bash
+kubectl cluster-info
+kubectl get nodes
+```
+
+You should see your cluster nodes listed.
+
+## Step 4: Install IBM Cloud CLI
+
+The IBM Cloud CLI is required for authenticating with Cloud Pak for Data.
+
+### macOS/Linux
+
+```bash
+curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
+```
+
+### Windows
+
+Download the installer from: [IBM Cloud CLI Downloads](https://cloud.ibm.com/docs/cli?topic=cli-install-ibmcloud-cli)
+
+### Verify Installation
+
+```bash
+ibmcloud --version
+```
+
+### Login to IBM Cloud
+
+```bash
+ibmcloud login --sso
+```
+
+Follow the prompts to authenticate.
+
+## Step 5: Install Cloud Pak for Data CLI Plugin
+
+```bash
+ibmcloud plugin install cloud-pak-data
+```
+
+Verify:
+```bash
+ibmcloud plugin list
+```
+
+## Verification Checklist
+
+Run these commands to verify all prerequisites are installed:
+
+```bash
+# Check kubectl
+kubectl version --client
+
+# Check Helm
+helm version
+
+# Check IBM Cloud CLI
+ibmcloud --version
+
+# Check cluster access
+kubectl get nodes
+
+# Check Cloud Pak for Data plugin
+ibmcloud plugin list | grep cloud-pak-data
+```
+
+:::success Prerequisites Complete!
+If all commands above executed successfully, you're ready to proceed to the next tutorial.
+:::
+
+## Troubleshooting
+
+### kubectl: command not found
+
+**Solution:** Ensure kubectl is in your PATH. On macOS/Linux:
+```bash
+export PATH=$PATH:/usr/local/bin
+```
+
+### Cannot connect to Kubernetes cluster
+
+**Solution:** Verify your kubeconfig file:
+```bash
+kubectl config view
+kubectl config get-contexts
+```
+
+### IBM Cloud CLI login fails
+
+**Solution:** Use SSO authentication:
+```bash
+ibmcloud login --sso
+```
+Then follow the URL provided to get your one-time passcode.
+
+## Next Steps
+
+✅ **Prerequisites installed successfully!**
+
+Continue to the next tutorial: [Deploy Remote Engine](/docs/tutorials/get-started/deploy-engine)
+
+---
+
+## Additional Resources
+
+- [kubectl Documentation](https://kubernetes.io/docs/reference/kubectl/)
+- [Helm Documentation](https://helm.sh/docs/)
+- [IBM Cloud CLI Documentation](https://cloud.ibm.com/docs/cli)

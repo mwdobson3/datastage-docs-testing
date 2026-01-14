@@ -1,0 +1,285 @@
+---
+sidebar_position: 2
+title: Deploy Remote Engine
+description: Deploy DataStage Remote Engine on Kubernetes using Helm
+---
+
+import VideoEmbed from '@site/src/components/VideoEmbed';
+
+# Deploy Remote Engine
+
+⏱️ **Duration:** 10 minutes
+
+## Overview
+
+In this tutorial, you'll deploy a DataStage Remote Engine to your Kubernetes cluster using Helm. The Remote Engine will handle job execution while connecting back to your Cloud Pak for Data instance for orchestration.
+
+:::info What You'll Do
+- Add the IBM Helm repository
+- Configure Remote Engine values
+- Deploy using Helm
+- Verify the deployment
+:::
+
+## Video Tutorial
+
+<VideoEmbed 
+  videoId="dQw4w9WgXcQ" 
+  platform="youtube"
+  title="Deploying DataStage Remote Engine"
+/>
+
+## Step 1: Add IBM Helm Repository
+
+First, add the IBM Helm chart repository:
+
+```bash
+helm repo add ibm-helm https://raw.githubusercontent.com/IBM/charts/master/repo/ibm-helm
+helm repo update
+```
+
+Verify the repository was added:
+
+```bash
+helm search repo datastage
+```
+
+## Step 2: Create Namespace
+
+Create a dedicated namespace for the Remote Engine:
+
+```bash
+kubectl create namespace datastage-remote
+```
+
+Set it as your default namespace (optional):
+
+```bash
+kubectl config set-context --current --namespace=datastage-remote
+```
+
+## Step 3: Create Configuration File
+
+Create a `values.yaml` file with your configuration:
+
+```yaml title="values.yaml"
+# DataStage Remote Engine Configuration
+global:
+  # Your Cloud Pak for Data URL
+  cloudPakUrl: "https://your-cpd-instance.cloud.ibm.com"
+  
+  # Authentication token (from Cloud Pak for Data)
+  authToken: "YOUR_AUTH_TOKEN_HERE"
+
+# Resource allocation
+resources:
+  requests:
+    memory: "4Gi"
+    cpu: "2"
+  limits:
+    memory: "8Gi"
+    cpu: "4"
+
+# Number of engine replicas
+replicaCount: 2
+
+# Storage configuration
+persistence:
+  enabled: true
+  storageClass: "gp2"  # Change based on your cloud provider
+  size: "50Gi"
+
+# Networking
+service:
+  type: LoadBalancer
+  port: 31538
+```
+
+:::warning Important
+Replace `YOUR_AUTH_TOKEN_HERE` with an actual authentication token from your Cloud Pak for Data instance.
+:::
+
+## Step 4: Get Authentication Token
+
+To get your authentication token from Cloud Pak for Data:
+
+1. Log in to Cloud Pak for Data web console
+2. Navigate to **Profile and Settings** → **API Key**
+3. Click **Generate new key**
+4. Copy the generated key
+
+Alternatively, use the CLI:
+
+```bash
+# Login to Cloud Pak for Data
+cpd-cli login \
+  --url https://your-cpd-instance.cloud.ibm.com \
+  --username your-username \
+  --password your-password
+
+# Get token
+cpd-cli config users get-token
+```
+
+## Step 5: Deploy Remote Engine
+
+Deploy the Remote Engine using Helm:
+
+```bash
+helm install datastage-engine ibm-helm/ibm-datastage-remote \
+  --namespace datastage-remote \
+  --values values.yaml \
+  --wait
+```
+
+The `--wait` flag ensures Helm waits for all pods to be ready before returning.
+
+## Step 6: Verify Deployment
+
+Check the deployment status:
+
+```bash
+# Check pods
+kubectl get pods -n datastage-remote
+
+# Check services
+kubectl get svc -n datastage-remote
+
+# Check deployment details
+kubectl describe deployment datastage-engine -n datastage-remote
+```
+
+Expected output:
+```
+NAME                              READY   STATUS    RESTARTS   AGE
+datastage-engine-7d4f8c9b-2xk4p   1/1     Running   0          2m
+datastage-engine-7d4f8c9b-9hn7q   1/1     Running   0          2m
+```
+
+## Step 7: Get Engine Connection Details
+
+Retrieve the external IP or hostname:
+
+```bash
+kubectl get svc datastage-engine -n datastage-remote
+```
+
+Note the `EXTERNAL-IP` value - you'll need this to connect from Cloud Pak for Data.
+
+## Step 8: Test Connectivity
+
+Test that the engine is reachable:
+
+```bash
+# Get the service endpoint
+ENGINE_URL=$(kubectl get svc datastage-engine -n datastage-remote -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+
+# Test connection
+curl -k https://${ENGINE_URL}:31538/health
+```
+
+Expected response:
+```json
+{
+  "status": "healthy",
+  "version": "11.7.1.0",
+  "timestamp": "2024-01-14T15:00:00Z"
+}
+```
+
+## Troubleshooting
+
+### Pods stuck in Pending state
+
+**Cause:** Insufficient cluster resources
+
+**Solution:** Check resource availability:
+```bash
+kubectl describe nodes
+kubectl top nodes
+```
+
+Reduce resource requests in `values.yaml` if needed.
+
+### ImagePullBackOff error
+
+**Cause:** Cannot pull Docker images
+
+**Solution:** Verify image pull secrets:
+```bash
+kubectl get secrets -n datastage-remote
+```
+
+Create image pull secret if missing:
+```bash
+kubectl create secret docker-registry ibm-entitlement-key \
+  --docker-server=cp.icr.io \
+  --docker-username=cp \
+  --docker-password=YOUR_ENTITLEMENT_KEY \
+  --namespace=datastage-remote
+```
+
+### Service has no external IP
+
+**Cause:** LoadBalancer not provisioned
+
+**Solution:** Check cloud provider load balancer:
+```bash
+kubectl describe svc datastage-engine -n datastage-remote
+```
+
+Or use NodePort instead:
+```yaml
+service:
+  type: NodePort
+  nodePort: 31538
+```
+
+## Monitoring the Deployment
+
+View real-time logs:
+
+```bash
+# All pods
+kubectl logs -f -l app=datastage-engine -n datastage-remote
+
+# Specific pod
+kubectl logs -f datastage-engine-7d4f8c9b-2xk4p -n datastage-remote
+```
+
+Check resource usage:
+
+```bash
+kubectl top pods -n datastage-remote
+```
+
+## Scaling the Deployment
+
+To scale the number of engine replicas:
+
+```bash
+# Scale to 4 replicas
+kubectl scale deployment datastage-engine --replicas=4 -n datastage-remote
+
+# Or update Helm release
+helm upgrade datastage-engine ibm-helm/ibm-datastage-remote \
+  --namespace datastage-remote \
+  --set replicaCount=4 \
+  --reuse-values
+```
+
+:::success Deployment Complete!
+Your DataStage Remote Engine is now running on Kubernetes!
+:::
+
+## Next Steps
+
+Continue to the next tutorial: [Connect to Cloud Pak for Data](/docs/tutorials/get-started/connect-cloud-pak)
+
+---
+
+## Additional Resources
+
+- [Helm Chart Documentation](https://github.com/IBM/charts/tree/master/repo/ibm-helm/ibm-datastage-remote)
+- [Kubernetes Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
+- [DataStage Remote Engine Architecture](https://www.ibm.com/docs/en/cloud-paks/cp-data)
