@@ -25,12 +25,12 @@ function HomepageHeader() {
         <div className={styles.buttons}>
           <Link
             className="button button--primary button--lg"
-            to="/docs/tutorials">
+            to="/datastage-docs-testing/docs/tutorials">
             Get Started →
           </Link>
           <Link
             className="button button--outline button--primary button--lg"
-            to="/docs/intro"
+            to="/datastage-docs-testing/docs/intro"
             style={{marginLeft: '1rem'}}>
             Learn More
           </Link>
@@ -132,7 +132,7 @@ function DeploymentOptions() {
               </ul>
               <Link
                 className="button button--primary"
-                to="/docs/tutorials/aws-docker-engine">
+                to="/datastage-docs-testing/docs/tutorials/aws-docker-engine">
                 View Docker Tutorial
               </Link>
             </div>
@@ -149,7 +149,7 @@ function DeploymentOptions() {
               </ul>
               <Link
                 className="button button--primary"
-                to="/docs/tutorials/aws-eks-kubernetes">
+                to="/datastage-docs-testing/docs/tutorials/aws-eks-kubernetes">
                 View Kubernetes Tutorial
               </Link>
             </div>

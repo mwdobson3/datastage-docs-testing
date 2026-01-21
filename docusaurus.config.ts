@@ -62,7 +62,7 @@ const config: Config = {
     announcementBar: {
       id: 'welcome',
       content:
-        '📚 Welcome to DataStage Anywhere Documentation! <a href="/docs/tutorials">Explore Tutorials</a>',
+        '📚 Welcome to DataStage Anywhere Documentation! <a href="/datastage-docs-testing/docs/tutorials">Explore Tutorials</a>',
       backgroundColor: '#0f62fe',
       textColor: '#ffffff',
       isCloseable: true,
@@ -77,7 +77,7 @@ const config: Config = {
       title: 'DataStage Anywhere',
       logo: {
         alt: 'DataStage Logo',
-        src: 'img/logo.svg',
+        src: 'img/logo.png',
       },
       items: [
         {
@@ -101,7 +101,7 @@ const config: Config = {
           items: [
             {
               label: 'Getting Started',
-              to: '/docs/intro',
+              to: '/datastage-docs-testing/docs/intro',
             },
           ],
         },
