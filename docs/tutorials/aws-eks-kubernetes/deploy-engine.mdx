@@ -3,6 +3,22 @@ sidebar_position: 5
 title: Deploy Remote Engine
 ---
 
+import TutorialProgressBar from '@site/src/components/TutorialProgressBar';
+
+<TutorialProgressBar
+  tutorialId="aws-eks-kubernetes"
+  currentStepId="deploy-engine"
+  steps={[
+    { id: 'prerequisites', title: 'Prerequisites', path: '/datastage-docs-testing/docs/tutorials/aws-eks-kubernetes/prerequisites' },
+    { id: 'provision-eks', title: 'Provision EKS', path: '/datastage-docs-testing/docs/tutorials/aws-eks-kubernetes/provision-eks' },
+    { id: 'configure-kubectl', title: 'Configure kubectl', path: '/datastage-docs-testing/docs/tutorials/aws-eks-kubernetes/configure-kubectl' },
+    { id: 'prepare-config', title: 'Prepare Config', path: '/datastage-docs-testing/docs/tutorials/aws-eks-kubernetes/prepare-config' },
+    { id: 'deploy-engine', title: 'Deploy Engine', path: '/datastage-docs-testing/docs/tutorials/aws-eks-kubernetes/deploy-engine' },
+    { id: 'monitor-verify', title: 'Monitor & Verify', path: '/datastage-docs-testing/docs/tutorials/aws-eks-kubernetes/monitor-verify' },
+  ]}
+/>
+
+
 # Deploy Remote Engine
 
 ⏱️ **Duration:** 10 minutes

@@ -1,0 +1,236 @@
+/* Horizontal tutorial progress bar at the top of the page */
+.tutorial-progress-bar-container {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme='dark'] .tutorial-progress-bar-container {
+  background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);
+  border-color: var(--ifm-color-emphasis-300);
+}
+
+.tutorial-progress-bar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.tutorial-progress-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.tutorial-progress-label {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--ifm-color-emphasis-800);
+}
+
+.tutorial-progress-percentage {
+  background-color: var(--ifm-color-primary);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.tutorial-progress-steps-count {
+  font-size: 0.9rem;
+  color: var(--ifm-color-emphasis-700);
+  font-weight: 500;
+}
+
+/* Progress track with steps */
+.tutorial-progress-track {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  overflow-x: auto;
+  padding: 0.5rem 0;
+}
+
+.tutorial-progress-step {
+  flex: 1;
+  min-width: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  padding: 0.75rem 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  background-color: var(--ifm-color-emphasis-100);
+  border: 2px solid var(--ifm-color-emphasis-300);
+  position: relative;
+}
+
+.tutorial-progress-step:hover {
+  background-color: var(--ifm-color-emphasis-200);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.tutorial-progress-step.completed {
+  background-color: #e8f5e9;
+  border-color: #4caf50;
+}
+
+[data-theme='dark'] .tutorial-progress-step.completed {
+  background-color: #1b5e20;
+  border-color: #66bb6a;
+}
+
+.tutorial-progress-step.current {
+  background-color: var(--ifm-color-primary-lightest);
+  border-color: var(--ifm-color-primary);
+  border-width: 3px;
+  box-shadow: 0 0 0 3px rgba(15, 98, 254, 0.1);
+}
+
+.tutorial-progress-step-indicator {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  background-color: var(--ifm-color-emphasis-300);
+  color: var(--ifm-color-emphasis-700);
+  transition: all 0.2s ease;
+}
+
+.tutorial-progress-step.completed .tutorial-progress-step-indicator {
+  background-color: #4caf50;
+  color: white;
+}
+
+[data-theme='dark'] .tutorial-progress-step.completed .tutorial-progress-step-indicator {
+  background-color: #66bb6a;
+}
+
+.tutorial-progress-step.current .tutorial-progress-step-indicator {
+  background-color: var(--ifm-color-primary);
+  color: white;
+  box-shadow: 0 0 0 4px rgba(15, 98, 254, 0.2);
+  transform: scale(1.1);
+}
+
+.tutorial-progress-step-title {
+  font-size: 0.8rem;
+  text-align: center;
+  color: var(--ifm-font-color-base);
+  line-height: 1.3;
+  font-weight: 500;
+}
+
+.tutorial-progress-step.current .tutorial-progress-step-title {
+  font-weight: 700;
+  color: var(--ifm-color-primary);
+}
+
+.tutorial-progress-step.completed .tutorial-progress-step-title {
+  color: #2e7d32;
+}
+
+[data-theme='dark'] .tutorial-progress-step.completed .tutorial-progress-step-title {
+  color: #81c784;
+}
+
+/* Navigation buttons */
+.tutorial-progress-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.tutorial-nav-button {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.75rem 1.25rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.tutorial-nav-prev {
+  background-color: var(--ifm-color-emphasis-200);
+  color: var(--ifm-font-color-base);
+  border: 2px solid var(--ifm-color-emphasis-300);
+}
+
+.tutorial-nav-prev:hover {
+  background-color: var(--ifm-color-emphasis-300);
+  text-decoration: none;
+  color: var(--ifm-font-color-base);
+  transform: translateX(-4px);
+}
+
+.tutorial-nav-next {
+  background-color: var(--ifm-color-primary);
+  color: white;
+  border: 2px solid var(--ifm-color-primary);
+}
+
+.tutorial-nav-next:hover {
+  background-color: var(--ifm-color-primary-dark);
+  text-decoration: none;
+  color: white;
+  transform: translateX(4px);
+}
+
+.tutorial-complete-badge {
+  flex: 1;
+  padding: 0.75rem 1.25rem;
+  background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+  color: white;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 1rem;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .tutorial-progress-track {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tutorial-progress-step {
+    min-width: 100px;
+  }
+
+  .tutorial-progress-step-title {
+    font-size: 0.75rem;
+  }
+
+  .tutorial-progress-navigation {
+    flex-direction: column;
+  }
+
+  .tutorial-nav-button {
+    width: 100%;
+  }
+}
+
+/* Made with Bob */
