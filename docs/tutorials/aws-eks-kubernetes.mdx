@@ -4,9 +4,61 @@ title: AWS EKS (Kubernetes)
 description: Deploy DataStage Remote Engine on Amazon EKS
 ---
 
+import TutorialChecklist from '@site/src/components/TutorialChecklist';
+
 # Deploy DataStage Remote Engine on AWS EKS
 
 Learn how to deploy a DataStage Remote Engine on Amazon Elastic Kubernetes Service (EKS) to run data integration workloads close to your data sources while maintaining centralized control through IBM Cloud Pak for Data.
+
+## Tutorial Progress
+
+<TutorialChecklist
+  tutorialId="aws-eks-kubernetes"
+  steps={[
+    {
+      id: 'prerequisites',
+      title: 'Prerequisites and Setup',
+      description: 'Gather required tools and access',
+      duration: '10 min',
+      link: '/datastage-docs-testing/docs/tutorials/aws-eks-kubernetes/prerequisites'
+    },
+    {
+      id: 'provision-eks',
+      title: 'Provision EKS Cluster',
+      description: 'Create or access AWS EKS cluster',
+      duration: '15-20 min',
+      link: '/datastage-docs-testing/docs/tutorials/aws-eks-kubernetes/provision-eks'
+    },
+    {
+      id: 'configure-kubectl',
+      title: 'Configure kubectl Access',
+      description: 'Connect to your EKS cluster',
+      duration: '5 min',
+      link: '/datastage-docs-testing/docs/tutorials/aws-eks-kubernetes/configure-kubectl'
+    },
+    {
+      id: 'prepare-config',
+      title: 'Prepare Configuration File',
+      description: 'Set up engine parameters',
+      duration: '10 min',
+      link: '/datastage-docs-testing/docs/tutorials/aws-eks-kubernetes/prepare-config'
+    },
+    {
+      id: 'deploy-engine',
+      title: 'Deploy Remote Engine',
+      description: 'Install DataStage on EKS',
+      duration: '15 min',
+      link: '/datastage-docs-testing/docs/tutorials/aws-eks-kubernetes/deploy-engine'
+    },
+    {
+      id: 'monitor-verify',
+      title: 'Monitor and Verify',
+      description: 'Ensure successful deployment',
+      duration: '5-10 min',
+      link: '/datastage-docs-testing/docs/tutorials/aws-eks-kubernetes/monitor-verify'
+    }
+  ]}
+/>
 
 ## Why Deploy on Kubernetes?
 

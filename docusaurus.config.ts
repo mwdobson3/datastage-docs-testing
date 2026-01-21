@@ -6,8 +6,8 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
   title: 'DataStage Anywhere',
-  tagline: 'Deploy Remote Engines on Kubernetes',
-  favicon: 'img/favicon.ico',
+  tagline: 'Execute data pipelines as close to your data as possible',
+  favicon: 'img/favicon.png',
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
@@ -53,8 +53,8 @@ const config: Config = {
   ],
 
   themeConfig: {
-    // Replace with your project's social card
-    image: 'img/docusaurus-social-card.jpg',
+    // Social card for link previews
+    image: 'img/datastage-social-card.png',
     colorMode: {
       respectPrefersColorScheme: true,
     },
