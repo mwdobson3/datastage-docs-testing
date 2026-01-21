@@ -1,0 +1,330 @@
+---
+sidebar_position: 6
+title: Verify and Configure in IBM Cloud
+---
+
+# Verify and Configure in IBM Cloud
+
+⏱️ **Duration:** 5 minutes
+
+In this final step, you'll verify your Remote Engine is connected to IBM Cloud and configure it as the default engine for your DataStage project.
+
+## Verify Remote Engine Registration
+
+### Step 1: Access DataStage Settings
+
+1. Log in to [IBM Cloud Pak for Data](https://dataplatform.cloud.ibm.com/)
+2. Navigate to your project
+3. Click on the **Manage** tab
+4. In the left sidebar, click **DataStage**
+
+### Step 2: Refresh the Page
+
+Click the refresh button or reload the page to see your newly registered Remote Engine.
+
+### Step 3: Verify Engine Appears
+
+You should now see your Remote Engine listed:
+
+- **Name**: `aws-getting-started` (or your chosen name)
+- **Status**: Should show as connected/active
+- **Type**: Remote
+
+:::success
+If you see your engine listed, registration was successful!
+:::
+
+## Configure Remote Engine as Default
+
+### Step 1: Select Remote Environment
+
+1. In the DataStage settings page, locate the **Environment** section
+2. Select the **Remote** radio button
+3. From the dropdown menu, select your Remote Engine: `aws-getting-started`
+
+### Step 2: Set as Default
+
+1. Check the box to **Set as default** (if available)
+2. This ensures all new DataStage jobs use this Remote Engine by default
+
+### Step 3: Save Configuration
+
+1. Click the **Save** button at the bottom of the page
+2. Wait for the confirmation message
+
+:::tip
+Setting the engine as default means you don't have to manually select it for each job.
+:::
+
+## View Remote Engine Details
+
+### Access Remote Environments Tab
+
+1. In the DataStage settings, click on the **Remote environments** tab
+2. You'll see detailed information about your Remote Engine:
+
+| Detail | Description |
+|--------|-------------|
+| **Name** | Your engine name |
+| **Status** | Connection status (Connected/Disconnected) |
+| **Version** | DataStage Remote Engine version |
+| **Last Heartbeat** | Last communication with IBM Cloud |
+| **Resources** | CPU and memory allocation |
+| **Location** | Where the engine is running |
+
+![Remote Engine Details](https://via.placeholder.com/800x400?text=Remote+Engine+Details)
+
+### Monitor Engine Health
+
+The Remote environments tab shows:
+- **Connection Status**: Real-time connection state
+- **Resource Usage**: CPU and memory utilization
+- **Job History**: Recent jobs executed on this engine
+- **Logs**: Access to engine logs (if available)
+
+## Test the Remote Engine
+
+### Create a Simple Test Job
+
+1. Navigate to your project's **Assets** tab
+2. Click **New asset** → **DataStage flow**
+3. Name it: `test-remote-engine`
+4. Create a simple job:
+   - Add a **Row Generator** stage
+   - Add a **Peek** stage
+   - Connect them
+
+### Run the Test Job
+
+1. Click **Run** in the DataStage canvas
+2. Verify the job runs on your Remote Engine
+3. Check the job log to confirm execution location
+
+:::info
+The job log will show it's running on your Remote Engine, not the default Cloud Pak for Data environment.
+:::
+
+## Verify on EC2 Instance
+
+### Check Container Status
+
+SSH to your EC2 instance and verify the container is still running:
+
+```bash
+docker ps
+```
+
+Expected output:
+```
+CONTAINER ID   IMAGE                            COMMAND                  CREATED          STATUS                    PORTS      NAMES
+975b01b5bf61   icr.io/datastage/ds-px-runtime   "/bin/bash -c /px-st…"   10 minutes ago   Up 10 minutes (healthy)   9443/tcp   aws-getting-started_runtime
+```
+
+### Check Container Logs
+
+View recent logs to see activity:
+
+```bash
+docker logs --tail 50 aws-getting-started_runtime
+```
+
+Look for:
+- Heartbeat messages to IBM Cloud
+- Job execution logs (if you ran a test job)
+- No error messages
+
+### Check Resource Usage
+
+Monitor resource usage on your EC2 instance:
+
+```bash
+# Check disk usage
+df -h /mnt/data
+
+# Check memory usage
+free -h
+
+# Check Docker stats
+docker stats --no-stream aws-getting-started_runtime
+```
+
+## Manage Your Remote Engine
+
+### Stop the Remote Engine
+
+If you need to stop the engine:
+
+```bash
+cd ~/DataStage/RemoteEngine/docker/
+./dsengine.sh stop -n "aws-getting-started"
+```
+
+### Start the Remote Engine
+
+To start a stopped engine:
+
+```bash
+cd ~/DataStage/RemoteEngine/docker/
+./dsengine.sh start -n "aws-getting-started" \
+                    -a "YOUR_API_KEY" \
+                    -e "YOUR_ENCRYPTION_KEY" \
+                    -i "YOUR_ENCRYPTION_IV" \
+                    -p "YOUR_REGISTRY_KEY" \
+                    --project-id "YOUR_PROJECT_ID" \
+                    --volume-dir "/mnt/data/" \
+                    --set-user "ec2-user"
+```
+
+### View Engine Status
+
+Check the status of your engine:
+
+```bash
+./dsengine.sh status -n "aws-getting-started"
+```
+
+### View Engine Logs
+
+Access detailed logs:
+
+```bash
+./dsengine.sh logs -n "aws-getting-started"
+```
+
+## Troubleshooting
+
+### Engine Not Appearing in IBM Cloud
+
+**Problem:** Remote Engine doesn't show up in the UI
+
+**Solution:**
+1. Refresh the page (hard refresh: Ctrl+Shift+R or Cmd+Shift+R)
+2. Check container is running: `docker ps`
+3. Check container logs: `docker logs aws-getting-started_runtime`
+4. Verify network connectivity from EC2 to IBM Cloud
+5. Check API key and encryption keys are correct
+
+### Engine Shows as Disconnected
+
+**Problem:** Engine appears but shows disconnected status
+
+**Solution:**
+```bash
+# Check container health
+docker ps
+
+# Check container logs for errors
+docker logs aws-getting-started_runtime
+
+# Restart the container
+docker restart aws-getting-started_runtime
+
+# Check network connectivity
+ping -c 3 api.dataplatform.cloud.ibm.com
+```
+
+### Can't Set as Default
+
+**Problem:** Unable to set Remote Engine as default
+
+**Solution:**
+1. Ensure you have proper permissions in the project
+2. Try selecting the engine first, then saving
+3. Contact your project administrator if permissions are needed
+
+### Jobs Fail on Remote Engine
+
+**Problem:** Jobs fail when running on Remote Engine
+
+**Solution:**
+1. Check container logs: `docker logs aws-getting-started_runtime`
+2. Verify disk space: `df -h /mnt/data`
+3. Check memory: `free -h`
+4. Review job logs in IBM Cloud for specific errors
+5. Ensure connectors and stages are compatible with Remote Engine
+
+## Best Practices
+
+### Monitoring
+- Regularly check the Remote environments tab for engine health
+- Monitor disk space on `/mnt/data`
+- Set up alerts for container failures (optional)
+
+### Maintenance
+- Keep the DataStage repository updated: `git pull` in `~/DataStage`
+- Monitor IBM Cloud for Remote Engine version updates
+- Regularly review container logs for warnings
+
+### Security
+- Rotate API keys periodically
+- Keep encryption keys secure
+- Restrict SSH access to your EC2 instance
+- Use security groups to limit network access
+
+### Performance
+- Monitor resource usage during job execution
+- Scale EC2 instance type if needed
+- Consider multiple Remote Engines for high workloads
+
+## Next Steps
+
+Congratulations! Your DataStage Remote Engine is now fully operational. Here's what you can do next:
+
+### Explore DataStage Features
+- Create more complex DataStage flows
+- Connect to various data sources
+- Schedule jobs for automated execution
+- Monitor job performance
+
+### Scale Your Deployment
+- Deploy additional Remote Engines for different environments
+- Set up Remote Engines in different AWS regions
+- Configure Remote Engines for specific workloads
+
+### Learn More
+- [DataStage Documentation](https://www.ibm.com/docs/en/cloud-paks/cp-data/4.8.x?topic=services-datastage)
+- [Remote Engine Best Practices](https://www.ibm.com/docs/en/cloud-paks/cp-data)
+- [DataStage Tutorials](/docs/tutorials)
+
+## Clean Up (Optional)
+
+If you're done testing and want to remove the Remote Engine:
+
+### Remove from IBM Cloud
+1. Go to DataStage settings in your project
+2. Navigate to Remote environments tab
+3. Delete the Remote Engine
+
+### Stop and Remove Container
+```bash
+cd ~/DataStage/RemoteEngine/docker/
+./dsengine.sh stop -n "aws-getting-started"
+docker rm aws-getting-started_runtime
+```
+
+### Terminate EC2 Instance
+1. Go to AWS EC2 Console
+2. Select your instance
+3. Instance State → Terminate instance
+
+:::warning
+Terminating the EC2 instance will permanently delete all data. Ensure you've backed up anything important!
+:::
+
+## Summary
+
+In this tutorial, you successfully:
+- ✅ Verified Remote Engine registration in IBM Cloud
+- ✅ Configured the Remote Engine as default for your project
+- ✅ Viewed detailed engine information and status
+- ✅ Tested the Remote Engine with a sample job
+- ✅ Learned how to manage and monitor the engine
+- ✅ Understood best practices for operation and maintenance
+
+## Congratulations! 🎉
+
+You've successfully deployed a DataStage Remote Engine on AWS using Docker! Your engine is now ready to process DataStage jobs with the flexibility and scalability of AWS infrastructure.
+
+---
+
+**Need help?** Visit our [community forum](https://community.ibm.com/community/user/datamanagement/) or check the [troubleshooting guide](/docs/tutorials).

@@ -9,21 +9,40 @@ Learn how to deploy, configure, and manage DataStage Remote Engines on Kubernete
 
 ## Available Tutorial Series
 
-### Get Started with DataStage Anywhere
+### Deploy on AWS with Docker
 
-Deploy your first DataStage Remote Engine and run your first job.
+Deploy a DataStage Remote Engine on AWS EC2 using Docker containers.
 
 <div className="tutorial-card">
-  <h3>🚀 Get Started</h3>
-  <p>Learn the fundamentals of deploying and managing DataStage Remote Engines on Kubernetes.</p>
+  <h3>🐳 AWS Docker Deployment</h3>
+  <p>Step-by-step guide to deploy a DataStage Remote Engine on AWS EC2 using Docker.</p>
   <ul>
-    <li>Install prerequisites and tools</li>
-    <li>Deploy a Remote Engine</li>
-    <li>Connect to Cloud Pak for Data</li>
-    <li>Run your first DataStage job</li>
-    <li>Monitor and troubleshoot</li>
+    <li>Launch and configure AWS EC2 instance</li>
+    <li>Install Docker with secondary storage</li>
+    <li>Generate encryption keys</li>
+    <li>Deploy the Remote Engine container</li>
+    <li>Connect and verify in IBM Cloud</li>
   </ul>
-  <a href="/docs/tutorials/get-started" className="button button--primary">
+  <a href="/docs/tutorials/aws-docker-engine" className="button button--primary">
+    Start Tutorial →
+  </a>
+</div>
+
+### Deploy on AWS EKS with Kubernetes
+
+Deploy a DataStage Remote Engine on Amazon EKS using Kubernetes orchestration.
+
+<div className="tutorial-card">
+  <h3>☸️ AWS EKS Kubernetes Deployment</h3>
+  <p>Production-ready deployment of DataStage Remote Engine on AWS EKS with Kubernetes.</p>
+  <ul>
+    <li>Provision or access AWS EKS cluster</li>
+    <li>Configure kubectl and cluster access</li>
+    <li>Prepare deployment configuration</li>
+    <li>Deploy using Kubernetes operators</li>
+    <li>Monitor pods and verify registration</li>
+  </ul>
+  <a href="/docs/tutorials/aws-eks-kubernetes" className="button button--primary">
     Start Tutorial →
   </a>
 </div>
@@ -34,10 +53,12 @@ Deploy your first DataStage Remote Engine and run your first job.
 
 More tutorial series will be added here as content is developed:
 
+- **Deploy on AWS EKS with Kubernetes** - Deploy Remote Engine on Amazon EKS
+- **Deploy on Azure with Docker** - Deploy on Azure VMs
+- **Deploy on GCP with Docker** - Deploy on Google Cloud VMs
 - **Advanced Configuration** - Customize your Remote Engine deployment
 - **Security & Compliance** - Implement security best practices
 - **Performance Optimization** - Tune your engines for maximum performance
-- **Multi-Cloud Deployment** - Deploy across multiple cloud providers
 - **Troubleshooting Guide** - Common issues and solutions
 
 ---

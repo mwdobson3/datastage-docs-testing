@@ -1,0 +1,306 @@
+---
+sidebar_position: 3
+title: Configure kubectl Access
+---
+
+# Configure kubectl Access
+
+⏱️ **Duration:** 5 minutes
+
+In this step, you'll configure kubectl to access your EKS cluster using AWS credentials.
+
+## Set AWS Credentials
+
+First, configure your AWS credentials for CLI access.
+
+### Export Credentials (Temporary)
+
+For a temporary session, export the credentials:
+
+```bash
+export AWS_ACCESS_KEY_ID=YOUR_ACCESS_KEY_ID
+export AWS_SECRET_ACCESS_KEY=YOUR_SECRET_ACCESS_KEY
+```
+
+Replace with your actual credentials from:
+- **IBMers**: TechZone reservation details
+- **Customers**: Your AWS administrator
+
+:::tip
+These credentials are only valid for the current terminal session. You'll need to re-export them if you open a new terminal.
+:::
+
+### Configure AWS CLI (Persistent)
+
+For persistent configuration:
+
+```bash
+aws configure
+```
+
+When prompted, enter:
+```
+AWS Access Key ID [None]: YOUR_ACCESS_KEY_ID
+AWS Secret Access Key [None]: YOUR_SECRET_ACCESS_KEY
+Default region name [None]: us-east-1
+Default output format [None]: json
+```
+
+## Update kubeconfig
+
+Configure kubectl to access your EKS cluster:
+
+```bash
+aws eks update-kubeconfig --region REGION --name CLUSTER_NAME
+```
+
+Replace:
+- `REGION`: Your AWS region (e.g., `us-east-1`)
+- `CLUSTER_NAME`: Your EKS cluster name
+
+### Example
+
+```bash
+aws eks update-kubeconfig --region us-east-1 --name itzeks-662003sh3b-z6q66xod
+```
+
+Expected output:
+```
+Added new context arn:aws:eks:us-east-1:000694759418:cluster/itzeks-662003sh3b-z6q66xod to /Users/username/.kube/config
+```
+
+:::success
+kubectl is now configured to access your EKS cluster!
+:::
+
+## Verify Cluster Access
+
+### Check Nodes
+
+Verify you can see the cluster nodes:
+
+```bash
+kubectl get nodes
+```
+
+Expected output:
+```
+NAME                          STATUS   ROLES    AGE   VERSION
+ip-10-0-13-168.ec2.internal   Ready    <none>   39m   v1.33.5-eks-ecaa3a6
+ip-10-0-15-47.ec2.internal    Ready    <none>   39m   v1.33.5-eks-ecaa3a6
+ip-10-0-22-122.ec2.internal   Ready    <none>   39m   v1.33.5-eks-ecaa3a6
+ip-10-0-24-194.ec2.internal   Ready    <none>   39m   v1.33.5-eks-ecaa3a6
+```
+
+Key indicators:
+- **STATUS**: All nodes should show `Ready`
+- **VERSION**: Kubernetes version (1.28+)
+- **COUNT**: Should have 3-4 nodes
+
+### Check Namespaces
+
+List available namespaces:
+
+```bash
+kubectl get namespaces
+```
+
+Expected output:
+```
+NAME              STATUS   AGE
+default           Active   42m
+kube-node-lease   Active   42m
+kube-public       Active   42m
+kube-system       Active   42m
+```
+
+### Check Current Context
+
+Verify you're using the correct cluster context:
+
+```bash
+kubectl config current-context
+```
+
+Expected output:
+```
+arn:aws:eks:us-east-1:000694759418:cluster/itzeks-662003sh3b-z6q66xod
+```
+
+## Create Namespace for DataStage
+
+Create a dedicated namespace for the DataStage Remote Engine:
+
+```bash
+kubectl create namespace tutorial
+```
+
+Expected output:
+```
+namespace/tutorial created
+```
+
+Verify the namespace was created:
+
+```bash
+kubectl get namespaces
+```
+
+You should now see `tutorial` in the list.
+
+:::tip Namespace Naming
+You can use any name for your namespace. This tutorial uses `tutorial` for consistency. Common alternatives: `datastage`, `remote-engine`, `production`.
+:::
+
+## Verify Storage Class
+
+Check that the EFS storage class is available:
+
+```bash
+kubectl get storageclass
+```
+
+Expected output should include:
+```
+NAME            PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+efs-sc          efs.csi.aws.com         Delete          Immediate              false                  45m
+gp2 (default)   kubernetes.io/aws-ebs   Delete          WaitForFirstConsumer   false                  45m
+```
+
+Look for `efs-sc` in the list. This is the storage class you'll use for the Remote Engine.
+
+:::warning Important
+If `efs-sc` is not available, contact your AWS administrator. The DataStage Remote Engine requires EFS storage.
+:::
+
+## Test kubectl Commands
+
+Run a few more commands to ensure everything is working:
+
+### Get Cluster Information
+
+```bash
+kubectl cluster-info
+```
+
+### Get All Resources in tutorial Namespace
+
+```bash
+kubectl get all -n tutorial
+```
+
+Expected output (empty namespace):
+```
+No resources found in tutorial namespace.
+```
+
+### Check Your Permissions
+
+```bash
+kubectl auth can-i create deployments -n tutorial
+```
+
+Expected output:
+```
+yes
+```
+
+## Troubleshooting
+
+### Can't Connect to Cluster
+
+**Problem:** `error: You must be logged in to the server (Unauthorized)`
+
+**Solution:**
+```bash
+# Verify AWS credentials
+aws sts get-caller-identity
+
+# If this fails, re-export credentials
+export AWS_ACCESS_KEY_ID=YOUR_KEY
+export AWS_SECRET_ACCESS_KEY=YOUR_SECRET
+
+# Update kubeconfig again
+aws eks update-kubeconfig --region REGION --name CLUSTER_NAME
+```
+
+### Wrong Cluster Context
+
+**Problem:** kubectl is pointing to wrong cluster
+
+**Solution:**
+```bash
+# List all contexts
+kubectl config get-contexts
+
+# Switch to correct context
+kubectl config use-context CONTEXT_NAME
+
+# Or update kubeconfig again
+aws eks update-kubeconfig --region REGION --name CLUSTER_NAME
+```
+
+### Nodes Not Ready
+
+**Problem:** Nodes show `NotReady` status
+
+**Solution:**
+```bash
+# Describe a node to see issues
+kubectl describe node NODE_NAME
+
+# Check node logs
+kubectl logs -n kube-system -l k8s-app=aws-node
+
+# Wait a few minutes - nodes may still be initializing
+```
+
+### Namespace Already Exists
+
+**Problem:** `Error from server (AlreadyExists): namespaces "tutorial" already exists`
+
+**Solution:**
+This is fine! The namespace already exists. You can:
+- Use the existing namespace
+- Or delete and recreate: `kubectl delete namespace tutorial && kubectl create namespace tutorial`
+
+### Storage Class Not Found
+
+**Problem:** `efs-sc` storage class doesn't exist
+
+**Solution:**
+```bash
+# Check what storage classes are available
+kubectl get storageclass
+
+# If no EFS storage class exists, contact your AWS administrator
+# They need to install the EFS CSI driver and create the storage class
+```
+
+## Configuration Summary
+
+At this point, you should have:
+
+- ✅ AWS credentials configured
+- ✅ kubectl configured to access EKS cluster
+- ✅ Verified cluster nodes are ready
+- ✅ Created `tutorial` namespace
+- ✅ Verified `efs-sc` storage class exists
+- ✅ Tested kubectl commands successfully
+
+## Next Steps
+
+Now that kubectl is configured, proceed to prepare the configuration file for the Remote Engine deployment:
+
+**[Prepare Configuration File →](/docs/tutorials/aws-eks-kubernetes/prepare-config)**
+
+## Summary
+
+In this step, you:
+- ✅ Configured AWS credentials
+- ✅ Updated kubeconfig for EKS access
+- ✅ Verified cluster connectivity
+- ✅ Checked cluster nodes and namespaces
+- ✅ Created namespace for DataStage
+- ✅ Verified EFS storage class availability
+- ✅ Tested kubectl commands

@@ -1,0 +1,289 @@
+---
+sidebar_position: 4
+title: Prepare Configuration File
+---
+
+# Prepare Configuration File
+
+⏱️ **Duration:** 10 minutes
+
+In this step, you'll create an input configuration file that contains all the settings needed to deploy the DataStage Remote Engine on your EKS cluster.
+
+## Clone DataStage Repository
+
+First, clone the IBM DataStage repository which contains the deployment scripts:
+
+```bash
+# Navigate to your working directory
+cd ~
+
+# Clone the repository
+git clone https://github.com/IBM/DataStage.git
+
+# Navigate to the Kubernetes directory
+cd DataStage/RemoteEngine/kubernetes
+```
+
+Verify the contents:
+
+```bash
+ls -l
+```
+
+You should see:
+```
+-rwxr-xr-x  launch.sh
+-rw-r--r--  README.md
+```
+
+## Create Input Configuration File
+
+Create a configuration file with all the required settings for your Remote Engine deployment.
+
+### Create the File
+
+```bash
+# Create a directory for your configuration
+mkdir -p ~/datastage-config
+
+# Create the input file
+nano ~/datastage-config/input_file.txt
+```
+
+Or use your preferred text editor (vi, vim, code, etc.).
+
+### Configuration Template
+
+Copy and paste this template, then replace the placeholder values:
+
+```ini
+# License acceptance (required)
+# You must accept the IBM DataStage as a Service Anywhere license
+# License: https://www.ibm.com/support/customer/csol/terms/?ref=i126-9243-06-11-2023-zz-en
+license_accept=true
+
+# Data center where your DataStage is provisioned on IBM Cloud
+# Options: dallas, frankfurt, sydney, toronto, london, awsprod
+# Default: dallas
+data_center=dallas
+
+# Kubernetes namespace to deploy the remote engine
+namespace=tutorial
+
+# IBM Cloud Container Registry credentials
+# Username is always 'iamapikey'
+username=iamapikey
+# Password is your IBM Cloud Container Registry API key
+password=YOUR_CONTAINER_REGISTRY_API_KEY
+
+# IBM Cloud API key for the remote engine to use
+api_key=YOUR_IBM_CLOUD_API_KEY
+
+# Project ID from Cloud Pak for Data
+# Find this in your project settings
+projectId=YOUR_PROJECT_ID
+
+# Name of the remote engine (alphanumeric, no spaces)
+name=aws-getting-started-k8s
+
+# Size of the PX runtime
+# Options: small, medium, large
+# Default: small
+size=small
+
+# File storage class to use
+# For AWS EKS with EFS, use: efs-sc
+storage_class=efs-sc
+
+# Storage size in GB
+storage_size=20
+```
+
+### Fill in Your Values
+
+Replace these placeholders with your actual values:
+
+| Placeholder | Replace With | Example |
+|------------|--------------|---------|
+| `YOUR_CONTAINER_REGISTRY_API_KEY` | Your IBM Cloud API key | `rmoZA3EHTFjoAbWbQoRWSq2eVC1NS9k8PQ7gJ-uNNXKV` |
+| `YOUR_IBM_CLOUD_API_KEY` | Your IBM Cloud API key (same as above) | `qSOipvfdwXJjHSWxIgVd7u0d2V2WHsOR9A_V1SntP762` |
+| `YOUR_PROJECT_ID` | Your Cloud Pak for Data project ID | `5343d6a6-bd2b-401c-abc3-9fd7747335d3` |
+
+:::tip
+The Container Registry API key and IBM Cloud API key are typically the same key.
+:::
+
+### Example Completed Configuration
+
+Here's what your completed file should look like:
+
+```ini
+license_accept=true
+data_center=dallas
+namespace=tutorial
+username=iamapikey
+password=rmoZA3EHTFjoAbWbQoRWSq2eVC1NS9k8PQ7gJ-uNNXKV
+api_key=qSOipvfdwXJjHSWxIgVd7u0d2V2WHsOR9A_V1SntP762
+projectId=5343d6a6-bd2b-401c-abc3-9fd7747335d3
+name=aws-getting-started-k8s
+size=small
+storage_class=efs-sc
+storage_size=20
+```
+
+### Save the File
+
+- **nano**: Press `Ctrl+X`, then `Y`, then `Enter`
+- **vi/vim**: Press `Esc`, type `:wq`, press `Enter`
+
+## Configuration Options Explained
+
+### Required Fields
+
+| Field | Description | Example |
+|-------|-------------|---------|
+| `license_accept` | Must be `true` to accept license | `true` |
+| `namespace` | Kubernetes namespace for deployment | `tutorial` |
+| `username` | Always `iamapikey` for IBM Cloud | `iamapikey` |
+| `password` | IBM Cloud Container Registry API key | `rmoZA3E...` |
+| `api_key` | IBM Cloud API key | `qSOipvf...` |
+| `projectId` | Cloud Pak for Data project ID | `5343d6a6...` |
+| `name` | Remote engine name (alphanumeric) | `aws-getting-started-k8s` |
+| `storage_class` | Kubernetes storage class | `efs-sc` |
+
+### Optional Fields
+
+| Field | Description | Default | Options |
+|-------|-------------|---------|---------|
+| `data_center` | IBM Cloud data center | `dallas` | `dallas`, `frankfurt`, `sydney`, `toronto`, `london`, `awsprod` |
+| `size` | Runtime size | `small` | `small`, `medium`, `large` |
+| `storage_size` | Storage size in GB | `20` | Any number (20-100 recommended) |
+
+### Advanced Options (Optional)
+
+These are commented out in the template but can be uncommented if needed:
+
+```ini
+# Additional users who can control the remote engine
+# additional_users=IBMid-1000000000,IBMid-2000000000
+
+# For CP4D deployments (not IBM Cloud)
+# service_id=cpadmin
+# zen_url=https://your-cp4d-url
+
+# Proxy configuration
+# proxy_url=http://username:password@proxy_ip:port
+# cacert_location=/path/to/ca/cert
+
+# Kerberos authentication
+# KRB5_CONF_FILE=/path/to/krb5.conf
+# KRB5_CONF_DIR=/path/to/krb5/config/dir
+
+# DB2Z license
+# DB2Z_LICENSE=/path/to/db2z/license
+
+# Custom container registry (for image mirroring)
+# CUSTOM_DOCKER_REGISTRY=your-registry.com
+# OPERATOR_REGISTRY_SUFFIX=cpopen
+# DOCKER_REGISTRY_SUFFIX=cp/cpd
+# USE_DIGESTS=digest1,digest2,digest3
+
+# AWS MCSP account ID (for awsprod data center)
+# MCSP_ACCOUNT_ID=your-account-id
+```
+
+## Verify Configuration
+
+Check that your configuration file is correct:
+
+```bash
+cat ~/datastage-config/input_file.txt
+```
+
+Verify:
+- [ ] All required fields are filled in
+- [ ] No placeholder text remains (e.g., `YOUR_API_KEY`)
+- [ ] `license_accept=true`
+- [ ] `namespace=tutorial` (matches the namespace you created)
+- [ ] `storage_class=efs-sc` (matches your cluster's storage class)
+- [ ] `name` contains only alphanumeric characters and hyphens
+
+## Troubleshooting
+
+### Missing API Keys
+
+**Problem:** Don't have IBM Cloud API keys
+
+**Solution:**
+1. Go to [IBM Cloud API Keys](https://cloud.ibm.com/iam/apikeys)
+2. Click "Create an IBM Cloud API key"
+3. Name it "DataStage Remote Engine"
+4. Copy and save the key immediately (you can't retrieve it later)
+
+### Don't Know Project ID
+
+**Problem:** Can't find Cloud Pak for Data project ID
+
+**Solution:**
+1. Log in to [IBM Cloud Pak for Data](https://dataplatform.cloud.ibm.com/)
+2. Navigate to your project
+3. Click on the **Manage** tab
+4. The Project ID is displayed in the project information section
+5. Format: `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`
+
+### Wrong Storage Class
+
+**Problem:** Not sure what storage class to use
+
+**Solution:**
+```bash
+# List available storage classes
+kubectl get storageclass
+
+# For AWS EKS with EFS, use: efs-sc
+# For other setups, consult your Kubernetes administrator
+```
+
+### Invalid Characters in Name
+
+**Problem:** Remote engine name contains invalid characters
+
+**Solution:**
+- Use only lowercase letters, numbers, and hyphens
+- No spaces, underscores, or special characters
+- Must start with a letter
+- Examples: `aws-engine-1`, `prod-datastage`, `test-remote-engine`
+
+## Security Best Practices
+
+:::warning Protect Your Configuration
+Your configuration file contains sensitive API keys. Keep it secure!
+:::
+
+### Do's ✅
+- Store the file in a secure location
+- Set restrictive file permissions: `chmod 600 ~/datastage-config/input_file.txt`
+- Delete the file after deployment (optional)
+- Use a password manager for API keys
+
+### Don'ts ❌
+- Don't commit the file to Git
+- Don't share the file via email or chat
+- Don't store in publicly accessible locations
+- Don't reuse API keys across environments
+
+## Next Steps
+
+Your configuration file is ready! Proceed to deploy the Remote Engine:
+
+**[Deploy Remote Engine →](/docs/tutorials/aws-eks-kubernetes/deploy-engine)**
+
+## Summary
+
+In this step, you:
+- ✅ Cloned the DataStage repository
+- ✅ Created an input configuration file
+- ✅ Filled in all required values
+- ✅ Configured storage class and namespace
+- ✅ Verified the configuration
+- ✅ Prepared for deployment

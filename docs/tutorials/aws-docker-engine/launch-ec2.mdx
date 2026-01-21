@@ -1,0 +1,281 @@
+---
+sidebar_position: 2
+title: Launch and Configure EC2 Instance
+---
+
+# Launch and Configure EC2 Instance
+
+⏱️ **Duration:** 15 minutes
+
+In this step, you'll launch an AWS EC2 instance with the proper configuration for running a DataStage Remote Engine with Docker.
+
+## Launch EC2 Instance
+
+### Step 1: Access EC2 Console
+
+1. Log in to the [AWS Console](https://console.aws.amazon.com/)
+2. Navigate to **EC2** service
+3. Select your preferred region (e.g., `us-east-1`)
+4. Click **Launch Instance**
+
+### Step 2: Configure Instance Details
+
+#### Name and Tags
+```
+Name: datastage-remote-engine
+```
+
+#### Application and OS Images (AMI)
+- **Operating System**: Red Hat Enterprise Linux 9
+- **AMI**: RHEL-9.3.0_HVM or later
+- **Architecture**: x86_64
+
+:::tip Using IBM TechZone
+If you're using IBM TechZone, select:
+- **Operating System**: RHEL-9.3.0_HVM-20240229-x86_64-27-Hourly2-GP3
+:::
+
+#### Instance Type
+Select an appropriate instance type based on your workload:
+
+| Use Case | Instance Type | vCPU | Memory |
+|----------|--------------|------|--------|
+| Development/Testing | t3.large | 2 | 8 GB |
+| Production (Small) | t3.xlarge | 4 | 16 GB |
+| Production (Medium) | t3.2xlarge | 8 | 32 GB |
+
+**For this tutorial, select:** `t3.large`
+
+#### Key Pair
+- Select an existing key pair or create a new one
+- **Download the `.pem` file** if creating new (you can't download it again!)
+- Save it securely on your local machine
+
+### Step 3: Configure Storage
+
+#### Root Volume
+- **Size**: 30 GB minimum
+- **Volume Type**: gp3 (General Purpose SSD)
+- **Delete on Termination**: Yes (for testing)
+
+#### Add Secondary Volume
+Click **Add New Volume** and configure:
+
+| Setting | Value |
+|---------|-------|
+| **Device Name** | `/dev/sdh` or `/dev/xvdh` |
+| **Size** | 100 GB |
+| **Volume Type** | gp3 |
+| **Delete on Termination** | Yes (for testing) |
+
+:::warning Important
+The secondary volume is critical for Docker storage. Do not skip this step!
+:::
+
+### Step 4: Configure Network Settings
+
+#### Network
+- **VPC**: Default VPC (or your preferred VPC)
+- **Subnet**: Any available subnet
+- **Auto-assign Public IP**: Enable
+
+#### Security Group
+Create a new security group or use existing:
+
+**Inbound Rules:**
+| Type | Protocol | Port Range | Source | Description |
+|------|----------|------------|--------|-------------|
+| SSH | TCP | 22 | My IP | SSH access from your IP |
+
+:::tip Security Best Practice
+Restrict SSH access to your specific IP address, not `0.0.0.0/0` (anywhere).
+:::
+
+**Outbound Rules:**
+- Allow all outbound traffic (default)
+
+### Step 5: Review and Launch
+
+1. Review all settings
+2. Click **Launch Instance**
+3. Wait for the instance to reach **Running** state (2-3 minutes)
+
+## Note Instance Details
+
+Once your instance is running, note these details:
+
+```
+Instance ID: i-xxxxxxxxxxxxxxxxx
+Public IP: 3.23.101.44 (example)
+Private IP: 10.0.23.196 (example)
+```
+
+:::info
+Your actual IP addresses will be different. Use the values from your AWS console.
+:::
+
+## Configure SSH Key Permissions
+
+On your local machine, set the correct permissions for your SSH key:
+
+**macOS/Linux:**
+```bash
+# Navigate to the directory with your key
+cd ~/path/to/keys/
+
+# Set restrictive permissions
+chmod 400 your-key.pem
+
+# Verify permissions
+ls -l your-key.pem
+```
+
+Expected output:
+```
+-r-------- 1 user group 3243 Jan 21 12:35 your-key.pem
+```
+
+**Windows (PowerShell):**
+```powershell
+# Remove inherited permissions
+icacls your-key.pem /inheritance:r
+
+# Grant read access only to current user
+icacls your-key.pem /grant:r "$($env:USERNAME):(R)"
+```
+
+## Test SSH Connection
+
+Test your connection to the EC2 instance:
+
+```bash
+ssh -i your-key.pem ec2-user@YOUR_PUBLIC_IP
+```
+
+Replace:
+- `your-key.pem` with your actual key filename
+- `YOUR_PUBLIC_IP` with your instance's public IP
+
+**First connection:**
+```bash
+The authenticity of host '3.23.101.44 (3.23.101.44)' can't be established.
+ED25519 key fingerprint is SHA256:...
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+```
+
+Type `yes` and press Enter.
+
+**Successful connection:**
+```
+Register this system with Red Hat Insights: insights-client --register
+Create an account or view all your systems at https://red.ht/insights-dashboard
+[ec2-user@ip-10-0-23-196 ~]$
+```
+
+:::success
+You're now connected to your EC2 instance!
+:::
+
+## Verify Instance Configuration
+
+Run these commands to verify your instance:
+
+### Check Operating System
+```bash
+cat /etc/redhat-release
+```
+
+Expected output:
+```
+Red Hat Enterprise Linux release 9.3 (Plow)
+```
+
+### Check Available Disks
+```bash
+lsblk
+```
+
+Expected output:
+```
+NAME    MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
+xvda    202:0    0   30G  0 disk 
+├─xvda1 202:1    0    1M  0 part 
+├─xvda2 202:2    0  200M  0 part /boot/efi
+├─xvda3 202:3    0  500M  0 part /boot
+└─xvda4 202:4    0 29.3G  0 part /
+xvdh    202:112  0  100G  0 disk 
+```
+
+:::tip
+You should see `xvdh` (or `sdh`) as your 100GB secondary disk. This will be configured in the next step.
+:::
+
+### Check System Resources
+```bash
+# Check CPU
+lscpu | grep "^CPU(s):"
+
+# Check Memory
+free -h
+
+# Check Disk Space
+df -h
+```
+
+## Exit SSH Session
+
+For now, exit the SSH session:
+
+```bash
+exit
+```
+
+You'll reconnect in the next step to install Docker.
+
+## Troubleshooting
+
+### Can't Connect via SSH
+
+**Problem:** Connection timeout or refused
+
+**Solutions:**
+1. Verify security group allows SSH from your IP
+2. Check instance is in "Running" state
+3. Verify you're using the correct public IP
+4. Ensure key permissions are correct (`chmod 400`)
+
+### Wrong Key Permissions
+
+**Problem:** "Permissions 0644 for 'key.pem' are too open"
+
+**Solution:**
+```bash
+chmod 400 your-key.pem
+```
+
+### Secondary Disk Not Visible
+
+**Problem:** `lsblk` doesn't show `/dev/xvdh`
+
+**Solution:**
+1. Go to AWS EC2 console
+2. Select your instance
+3. Go to **Storage** tab
+4. Verify secondary volume is attached
+5. If not attached, attach it manually
+
+## Next Steps
+
+Your EC2 instance is now ready. Proceed to install Docker and configure storage:
+
+**[Install Docker and Configure Storage →](/docs/tutorials/aws-docker-engine/install-docker)**
+
+## Summary
+
+In this step, you:
+- ✅ Launched an EC2 instance with RHEL 9
+- ✅ Configured a 100GB secondary volume
+- ✅ Set up security groups for SSH access
+- ✅ Configured SSH key permissions
+- ✅ Successfully connected to the instance
+- ✅ Verified the instance configuration

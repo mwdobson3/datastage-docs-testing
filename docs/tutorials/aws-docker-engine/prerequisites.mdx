@@ -1,0 +1,191 @@
+---
+sidebar_position: 1
+title: Prerequisites and Setup
+---
+
+# Prerequisites and Setup
+
+⏱️ **Duration:** 10 minutes
+
+Before deploying a DataStage Remote Engine on AWS with Docker, ensure you have all the necessary accounts, tools, and permissions.
+
+## Required Accounts
+
+### AWS Account
+You need an AWS account with permissions to:
+- Create and manage EC2 instances
+- Configure security groups
+- Attach and manage EBS volumes
+- Generate and use SSH key pairs
+
+:::tip
+If you're an IBMer, you can use [IBM TechZone](https://techzone.ibm.com/) to provision AWS resources for testing.
+:::
+
+### IBM Cloud Account
+You need an IBM Cloud account with:
+- Access to Cloud Pak for Data
+- A DataStage project created
+- Permissions to create Remote Engines
+
+## Required Tools
+
+### SSH Client
+You'll need an SSH client to connect to your EC2 instance:
+
+**macOS/Linux:**
+```bash
+# SSH is pre-installed, verify with:
+ssh -V
+```
+
+**Windows:**
+- Use Windows Terminal with OpenSSH
+- Or install [PuTTY](https://www.putty.org/)
+
+### IBM Cloud CLI (Optional)
+While not required for this tutorial, the IBM Cloud CLI can be helpful:
+
+```bash
+# macOS
+brew install ibmcloud-cli
+
+# Linux
+curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
+
+# Windows
+# Download from: https://github.com/IBM-Cloud/ibm-cloud-cli-release/releases/
+```
+
+## Required Information
+
+Before starting, gather the following information:
+
+### IBM Cloud Information
+
+1. **IBM Cloud API Key**
+   - Navigate to [IBM Cloud API Keys](https://cloud.ibm.com/iam/apikeys)
+   - Click "Create an IBM Cloud API key"
+   - Save the key securely
+
+2. **IBM Cloud Container Registry API Key**
+   - Same as your IBM Cloud API key
+   - Used to pull DataStage container images
+
+3. **Project ID**
+   - Open your Cloud Pak for Data project
+   - Find the Project ID in the project settings
+
+### AWS Information
+
+1. **SSH Key Pair**
+   - Create or use an existing EC2 key pair
+   - Download the `.pem` file
+   - Keep it secure
+
+2. **Preferred AWS Region**
+   - Choose a region close to your data
+   - Example: `us-east-1`, `us-west-2`, `eu-west-1`
+
+## EC2 Instance Requirements
+
+Your EC2 instance should meet these minimum specifications:
+
+| Requirement | Specification |
+|------------|---------------|
+| **Operating System** | RHEL 9.3 or later |
+| **Instance Type** | t3.large or larger (2 vCPU, 8 GB RAM minimum) |
+| **Root Volume** | 30 GB minimum |
+| **Secondary Volume** | 100 GB minimum (for Docker storage) |
+| **Network** | Public IP address for SSH access |
+
+:::info Recommended Instance Types
+- **Development/Testing**: `t3.large` (2 vCPU, 8 GB RAM)
+- **Production**: `t3.xlarge` or larger (4 vCPU, 16 GB RAM)
+:::
+
+## Storage Configuration
+
+The DataStage Remote Engine requires significant storage for:
+- Container images (~10-15 GB)
+- Job execution data
+- Temporary files
+- Logs
+
+**Storage Strategy:**
+- **Root Volume** (`/`): Operating system and applications
+- **Secondary Volume** (`/mnt/data`): Docker storage and container data
+
+:::warning Important
+Always use a secondary volume for Docker storage to prevent filling up the root filesystem.
+:::
+
+## Network Requirements
+
+### Inbound Rules (Security Group)
+Your EC2 instance needs these inbound rules:
+
+| Type | Protocol | Port | Source | Purpose |
+|------|----------|------|--------|---------|
+| SSH | TCP | 22 | Your IP | SSH access |
+
+### Outbound Rules
+Your EC2 instance needs outbound access to:
+- **IBM Cloud**: `*.cloud.ibm.com` (HTTPS/443)
+- **Container Registry**: `icr.io` (HTTPS/443)
+- **Package Repositories**: For installing software
+
+## Pre-Deployment Checklist
+
+Before proceeding to the next step, verify you have:
+
+- [ ] AWS account with EC2 permissions
+- [ ] IBM Cloud account with Cloud Pak for Data access
+- [ ] IBM Cloud API key created and saved
+- [ ] IBM Cloud Container Registry API key (same as API key)
+- [ ] Cloud Pak for Data project created
+- [ ] Project ID noted
+- [ ] SSH client installed and working
+- [ ] AWS SSH key pair created and downloaded
+- [ ] Preferred AWS region selected
+- [ ] Understanding of storage requirements
+
+## Next Steps
+
+Once you have all prerequisites ready, proceed to:
+
+**[Launch and Configure EC2 Instance →](/docs/tutorials/aws-docker-engine/launch-ec2)**
+
+## Troubleshooting
+
+### Can't Create IBM Cloud API Key
+
+**Problem:** Don't have permissions to create API keys
+
+**Solution:** Contact your IBM Cloud account administrator to:
+- Grant you API key creation permissions
+- Create an API key on your behalf
+
+### Don't Have AWS Permissions
+
+**Problem:** Can't create EC2 instances
+
+**Solution:** 
+- Request EC2 permissions from your AWS administrator
+- Use IBM TechZone if you're an IBMer
+- Consider using a personal AWS account for testing
+
+### SSH Key Issues
+
+**Problem:** Lost or don't have SSH key
+
+**Solution:**
+- Create a new key pair in AWS EC2 console
+- Download the `.pem` file immediately (can't download again)
+- Set proper permissions: `chmod 400 your-key.pem`
+
+## Additional Resources
+
+- [AWS EC2 Documentation](https://docs.aws.amazon.com/ec2/)
+- [IBM Cloud API Keys](https://cloud.ibm.com/docs/account?topic=account-userapikey)
+- [Cloud Pak for Data Documentation](https://www.ibm.com/docs/en/cloud-paks/cp-data)

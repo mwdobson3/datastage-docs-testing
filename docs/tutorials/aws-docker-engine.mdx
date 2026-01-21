@@ -1,0 +1,130 @@
+---
+sidebar_position: 3
+title: Deploy on AWS with Docker
+description: Deploy DataStage Remote Engine on AWS EC2 using Docker
+---
+
+import TutorialChecklist from '@site/src/components/TutorialChecklist';
+
+# Deploy DataStage Remote Engine on AWS with Docker
+
+Learn how to deploy a DataStage Remote Engine on an AWS EC2 instance using Docker. This tutorial walks you through setting up a complete Docker-based remote engine environment connected to IBM Cloud Pak for Data.
+
+<a href="/docs/tutorials/aws-docker-engine/prerequisites" className="start-tutorial-btn">
+  Start Tutorial
+</a>
+
+## What You'll Learn
+
+In this tutorial series, you'll learn how to:
+
+- ✅ Set up an AWS EC2 instance with proper storage configuration
+- ✅ Install and configure Docker on RHEL 9
+- ✅ Configure secondary storage for Docker containers
+- ✅ Generate encryption keys for secure communication
+- ✅ Deploy the DataStage Remote Engine container
+- ✅ Connect and verify the engine in IBM Cloud
+
+## Tutorial Path
+
+<TutorialChecklist 
+  collectionId="aws-docker-engine"
+  tutorials={[
+    {
+      id: 'prerequisites',
+      title: 'Prerequisites and Setup',
+      duration: '10 min',
+      path: '/docs/tutorials/aws-docker-engine/prerequisites'
+    },
+    {
+      id: 'launch-ec2',
+      title: 'Launch and Configure EC2 Instance',
+      duration: '15 min',
+      path: '/docs/tutorials/aws-docker-engine/launch-ec2'
+    },
+    {
+      id: 'install-docker',
+      title: 'Install Docker and Configure Storage',
+      duration: '20 min',
+      path: '/docs/tutorials/aws-docker-engine/install-docker'
+    },
+    {
+      id: 'generate-keys',
+      title: 'Generate Encryption Keys',
+      duration: '5 min',
+      path: '/docs/tutorials/aws-docker-engine/generate-keys'
+    },
+    {
+      id: 'deploy-engine',
+      title: 'Deploy Remote Engine',
+      duration: '10 min',
+      path: '/docs/tutorials/aws-docker-engine/deploy-engine'
+    },
+    {
+      id: 'verify-configure',
+      title: 'Verify and Configure in IBM Cloud',
+      duration: '5 min',
+      path: '/docs/tutorials/aws-docker-engine/verify-configure'
+    }
+  ]}
+/>
+
+## Prerequisites
+
+Before starting this tutorial, ensure you have:
+
+- **AWS Account** - With permissions to create EC2 instances
+- **IBM Cloud Account** - With access to Cloud Pak for Data
+- **IBM Cloud API Key** - For authentication
+- **SSH Client** - Terminal access on your local machine
+- **Basic Linux Knowledge** - Familiarity with command-line operations
+
+:::tip Estimated Time
+The complete tutorial series takes approximately **65 minutes** to complete.
+:::
+
+## Architecture Overview
+
+This deployment creates a Docker-based DataStage Remote Engine on AWS:
+
+```
+┌─────────────────────────────────────┐
+│   IBM Cloud Pak for Data            │
+│   (Control Plane)                   │
+│   - Job Design & Management         │
+│   - Monitoring Dashboard            │
+└──────────────┬──────────────────────┘
+               │
+               │ HTTPS/Secure Connection
+               │
+┌──────────────▼──────────────────────┐
+│   AWS EC2 Instance (RHEL 9)         │
+│   ┌─────────────────────────────┐   │
+│   │  Docker Engine              │   │
+│   │  ┌─────────────────────┐    │   │
+│   │  │ DataStage Remote    │    │   │
+│   │  │ Engine Container    │    │   │
+│   │  └─────────────────────┘    │   │
+│   └─────────────────────────────┘   │
+│                                     │
+│   Secondary Storage: /mnt/data      │
+│   (100 GB for container images)     │
+└─────────────────────────────────────┘
+```
+
+## Key Features
+
+- **Isolated Environment**: Dedicated EC2 instance for your remote engine
+- **Scalable Storage**: Secondary disk for container images and data
+- **Secure Communication**: Encrypted connection to IBM Cloud
+- **Easy Management**: Docker-based deployment for simple updates
+
+## Need Help?
+
+- 📚 [Documentation Home](/docs/intro)
+- 💬 [IBM Community](https://community.ibm.com/community/user/datamanagement/)
+- 🐛 [Report Issues](https://github.com/mwdobson3/datastage-docs-testing/issues)
+
+---
+
+Ready to get started? Click the button above or proceed to [Prerequisites and Setup](/docs/tutorials/aws-docker-engine/prerequisites).
