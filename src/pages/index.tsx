@@ -160,6 +160,69 @@ function DeploymentOptions() {
   );
 }
 
+function ResourcesSection() {
+  return (
+    <section className={styles.resourcesSection}>
+      <div className="container">
+        <Heading as="h2" className={styles.sectionTitle}>
+          Additional Resources
+        </Heading>
+        <div className="row">
+          <div className="col col--4">
+            <div className={styles.resourceCard}>
+              <div className={styles.resourceIcon}>📚</div>
+              <Heading as="h3">Official Documentation</Heading>
+              <p>
+                Access the complete DataStage documentation on GitHub with scripts,
+                samples, and detailed technical guides.
+              </p>
+              <a
+                className="button button--outline button--primary"
+                href="https://github.com/IBM/DataStage"
+                target="_blank"
+                rel="noopener noreferrer">
+                View on GitHub →
+              </a>
+            </div>
+          </div>
+          <div className="col col--4">
+            <div className={styles.resourceCard}>
+              <div className={styles.resourceIcon}>📝</div>
+              <Heading as="h3">IBM Think Insights</Heading>
+              <p>
+                Learn about remote engine execution for data pipelines and best practices
+                from IBM experts.
+              </p>
+              <a
+                className="button button--outline button--primary"
+                href="https://www.ibm.com/think/insights/remote-engine-execution-data-pipelines"
+                target="_blank"
+                rel="noopener noreferrer">
+                Read Article →
+              </a>
+            </div>
+          </div>
+          <div className="col col--4">
+            <div className={styles.resourceCard}>
+              <div className={styles.resourceIcon}>🎓</div>
+              <Heading as="h3">Interactive Tutorials</Heading>
+              <p>
+                Step-by-step guides to deploy DataStage Remote Engines on AWS, Azure,
+                and other cloud platforms.
+              </p>
+              <Link
+                className="button button--outline button--primary"
+                to="/datastage-docs-testing/docs/tutorials">
+                Start Learning →
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function Home(): ReactNode {
   const {siteConfig} = useDocusaurusContext();
   return (
@@ -171,6 +234,7 @@ export default function Home(): ReactNode {
         <ArchitectureDiagram />
         <HomepageFeatures />
         <DeploymentOptions />
+        <ResourcesSection />
       </main>
     </Layout>
   );
