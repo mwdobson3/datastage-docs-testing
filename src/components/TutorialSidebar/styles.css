@@ -1,67 +1,65 @@
-.tutorial-sidebar {
-  position: sticky;
-  top: calc(var(--ifm-navbar-height) + 1rem);
-  padding: 1.5rem;
+/* Compact tutorial sidebar that sits in the right TOC area */
+.tutorial-sidebar-compact {
+  padding: 1rem;
   background: var(--ifm-color-emphasis-100);
   border-radius: 8px;
   border-left: 4px solid var(--ifm-color-primary);
-  margin-bottom: 2rem;
-  max-height: calc(100vh - var(--ifm-navbar-height) - 2rem);
-  overflow-y: auto;
-}
-
-.tutorial-sidebar-header {
   margin-bottom: 1.5rem;
 }
 
+.tutorial-sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
 .tutorial-sidebar-header h4 {
-  margin: 0 0 1rem 0;
-  font-size: 1.1rem;
+  margin: 0;
+  font-size: 0.95rem;
   font-weight: 600;
   color: var(--ifm-color-primary);
 }
 
-.tutorial-sidebar-progress {
-  margin-bottom: 0.5rem;
+.progress-text {
+  font-size: 0.85rem;
+  color: var(--ifm-color-emphasis-700);
+  font-weight: 600;
 }
 
-.tutorial-sidebar-progress .progress-bar-track {
-  height: 6px;
+.progress-bar-track {
+  height: 4px;
   background-color: var(--ifm-color-emphasis-300);
-  border-radius: 3px;
+  border-radius: 2px;
   overflow: hidden;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 
-.tutorial-sidebar-progress .progress-bar-fill {
+.progress-bar-fill {
   height: 100%;
   background-color: var(--ifm-color-primary);
   transition: width 0.3s ease;
 }
 
-.tutorial-sidebar-progress .progress-text {
-  font-size: 0.875rem;
-  color: var(--ifm-color-emphasis-700);
-}
-
 .tutorial-sidebar-steps {
   list-style: none;
   padding: 0;
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.75rem 0;
 }
 
 .tutorial-sidebar-step {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
 }
 
 .tutorial-sidebar-link {
   display: flex;
   align-items: center;
-  padding: 0.75rem;
+  padding: 0.5rem;
   border-radius: 4px;
   text-decoration: none;
   color: var(--ifm-font-color-base);
   transition: background-color 0.2s;
+  font-size: 0.85rem;
 }
 
 .tutorial-sidebar-link:hover {
@@ -76,19 +74,19 @@
 }
 
 .tutorial-sidebar-step.completed .tutorial-sidebar-link {
-  opacity: 0.8;
+  opacity: 0.7;
 }
 
 .step-indicator {
-  width: 28px;
-  height: 28px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 0.75rem;
+  margin-right: 0.5rem;
   flex-shrink: 0;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 600;
   background-color: var(--ifm-color-emphasis-200);
   color: var(--ifm-color-emphasis-700);
@@ -102,31 +100,24 @@
 .tutorial-sidebar-step.current .step-indicator {
   background-color: var(--ifm-color-primary);
   color: white;
-  box-shadow: 0 0 0 3px var(--ifm-color-primary-lightest);
-}
-
-.step-check {
-  font-size: 1rem;
-}
-
-.step-number {
-  font-size: 0.875rem;
+  box-shadow: 0 0 0 2px var(--ifm-color-primary-lightest);
 }
 
 .step-title {
   flex: 1;
-  font-size: 0.9rem;
-  line-height: 1.4;
+  font-size: 0.85rem;
+  line-height: 1.3;
 }
 
 .tutorial-sidebar-complete {
-  padding: 1rem;
+  padding: 0.5rem;
   background-color: #24a148;
   color: white;
   border-radius: 4px;
   text-align: center;
   font-weight: 600;
-  margin-bottom: 1rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
 }
 
 [data-theme='dark'] .tutorial-sidebar-complete {
@@ -135,13 +126,14 @@
 
 .tutorial-sidebar-next {
   display: block;
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 0.75rem;
   background-color: var(--ifm-color-primary);
   color: white !important;
   border-radius: 4px;
   text-align: center;
   text-decoration: none;
   font-weight: 600;
+  font-size: 0.85rem;
   transition: background-color 0.2s;
 }
 
@@ -149,15 +141,6 @@
   background-color: var(--ifm-color-primary-dark);
   text-decoration: none;
   color: white !important;
-}
-
-/* Responsive: hide on mobile, show on desktop */
-@media (max-width: 996px) {
-  .tutorial-sidebar {
-    position: relative;
-    top: 0;
-    max-height: none;
-  }
 }
 
 /* Made with Bob */

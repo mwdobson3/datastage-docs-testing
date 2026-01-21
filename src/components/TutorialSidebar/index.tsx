@@ -44,18 +44,17 @@ export default function TutorialSidebar({ tutorialId, currentStepId, steps }: Tu
   }
 
   return (
-    <div className="tutorial-sidebar">
+    <div className="tutorial-sidebar-compact">
       <div className="tutorial-sidebar-header">
         <h4>Tutorial Progress</h4>
-        <div className="tutorial-sidebar-progress">
-          <div className="progress-bar-track">
-            <div 
-              className="progress-bar-fill"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-          <span className="progress-text">{completedSteps.size} of {steps.length} completed</span>
-        </div>
+        <span className="progress-text">{completedSteps.size}/{steps.length}</span>
+      </div>
+
+      <div className="progress-bar-track">
+        <div 
+          className="progress-bar-fill"
+          style={{ width: `${progress}%` }}
+        />
       </div>
 
       <ul className="tutorial-sidebar-steps">
@@ -70,11 +69,7 @@ export default function TutorialSidebar({ tutorialId, currentStepId, steps }: Tu
             >
               <Link to={step.link} className="tutorial-sidebar-link">
                 <div className="step-indicator">
-                  {isCompleted ? (
-                    <span className="step-check">✓</span>
-                  ) : (
-                    <span className="step-number">{index + 1}</span>
-                  )}
+                  {isCompleted ? '✓' : index + 1}
                 </div>
                 <span className="step-title">{step.title}</span>
               </Link>
@@ -83,12 +78,6 @@ export default function TutorialSidebar({ tutorialId, currentStepId, steps }: Tu
         })}
       </ul>
 
-      {completedSteps.size === steps.length && (
-        <div className="tutorial-sidebar-complete">
-          🎉 Tutorial Complete!
-        </div>
-      )}
-
       {currentIndex < steps.length - 1 && (
         <Link 
           to={steps[currentIndex + 1].link}
@@ -96,6 +85,12 @@ export default function TutorialSidebar({ tutorialId, currentStepId, steps }: Tu
         >
           Next: {steps[currentIndex + 1].title} →
         </Link>
+      )}
+
+      {completedSteps.size === steps.length && (
+        <div className="tutorial-sidebar-complete">
+          🎉 Complete!
+        </div>
       )}
     </div>
   );
