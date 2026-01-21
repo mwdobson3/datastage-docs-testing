@@ -1,0 +1,225 @@
+---
+sidebar_position: 4
+title: Generate Encryption Keys
+---
+
+# Generate Encryption Keys
+
+⏱️ **Duration:** 5 minutes
+
+In this step, you'll generate the encryption key and initialization vector (IV) required for secure communication between your Remote Engine and IBM Cloud.
+
+## Why Encryption Keys?
+
+The DataStage Remote Engine uses AES-256-CBC encryption to secure communication with IBM Cloud Pak for Data. You need to generate:
+
+- **Encryption Key**: A 256-bit key for encrypting data
+- **Initialization Vector (IV)**: A random value for the encryption algorithm
+
+:::info
+These keys are generated once and used throughout the lifetime of your Remote Engine. Store them securely!
+:::
+
+## Generate Keys on EC2 Instance
+
+Connect to your EC2 instance if you're not already connected:
+
+```bash
+ssh -i your-key.pem ec2-user@YOUR_PUBLIC_IP
+```
+
+### Run OpenSSL Command
+
+Use OpenSSL to generate the encryption key and IV:
+
+```bash
+openssl enc -aes-256-cbc -k secret -P -md sha1
+```
+
+:::warning Deprecation Notice
+You'll see a warning about deprecated key derivation. This is expected and safe to ignore for this use case.
+:::
+
+### Example Output
+
+```
+*** WARNING : deprecated key derivation used.
+Using -iter or -pbkdf2 would be better.
+salt=1234567890ABCDEF
+key=114FD1E2163B412DEF208113F2A66739E148D120E2D8CD26503421946FB9CACF
+iv =33DE46A74DCB8B4A405698B14F7837B9
+```
+
+:::tip
+Your actual values will be different. Use YOUR generated values, not these examples!
+:::
+
+## Save Your Keys
+
+Copy and save these values securely. You'll need them in the next step:
+
+### Encryption Key
+```
+114FD1E2163B412DEF208113F2A66739E148D120E2D8CD26503421946FB9CACF
+```
+(This is the value after `key=`)
+
+### Initialization Vector (IV)
+```
+33DE46A74DCB8B4A405698B14F7837B9
+```
+(This is the value after `iv =`)
+
+:::warning Important
+- **Do not share these keys publicly**
+- **Store them in a secure password manager**
+- **You'll need them for the deployment step**
+- **If you lose them, you'll need to regenerate and redeploy**
+:::
+
+## Alternative: Generate on Local Machine
+
+If you prefer, you can generate keys on your local machine instead:
+
+**macOS/Linux:**
+```bash
+openssl enc -aes-256-cbc -k secret -P -md sha1
+```
+
+**Windows (PowerShell with OpenSSL installed):**
+```powershell
+openssl enc -aes-256-cbc -k secret -P -md sha1
+```
+
+## Prepare Other Required Information
+
+While you have your keys ready, gather these other pieces of information you'll need:
+
+### From IBM Cloud
+
+1. **IBM Cloud API Key**
+   - Your API key from [IBM Cloud API Keys](https://cloud.ibm.com/iam/apikeys)
+   - Example format: `***REMOVED***`
+
+2. **IBM Cloud Container Registry API Key**
+   - Same as your IBM Cloud API key
+   - Example format: `***REMOVED***`
+
+3. **Project ID**
+   - From your Cloud Pak for Data project settings
+   - Example format: `***REMOVED***`
+
+### Remote Engine Configuration
+
+4. **Remote Engine Name**
+   - Choose a descriptive name for your engine
+   - Example: `aws-getting-started` or `aws-prod-engine`
+   - Use lowercase, hyphens allowed, no spaces
+
+## Create a Configuration Checklist
+
+Create a text file with all your values (keep this secure!):
+
+```text
+=== DataStage Remote Engine Configuration ===
+
+Remote Engine Name: aws-getting-started
+
+IBM Cloud API Key: ***REMOVED***
+
+Encryption Key: 114FD1E2163B412DEF208113F2A66739E148D120E2D8CD26503421946FB9CACF
+
+Encryption IV: 33DE46A74DCB8B4A405698B14F7837B9
+
+Container Registry API Key: ***REMOVED***
+
+Project ID: ***REMOVED***
+
+Volume Directory: /mnt/data/
+
+Set User: ec2-user
+
+Max Memory: 4 (GB)
+
+Max CPUs: 2
+```
+
+:::tip
+Replace all example values with your actual values!
+:::
+
+## Verify You Have Everything
+
+Before proceeding, confirm you have:
+
+- [ ] Encryption key (64 hexadecimal characters)
+- [ ] Initialization vector (32 hexadecimal characters)
+- [ ] IBM Cloud API key
+- [ ] IBM Cloud Container Registry API key
+- [ ] Project ID (UUID format)
+- [ ] Remote engine name chosen
+- [ ] Volume directory path (`/mnt/data/`)
+- [ ] User name (`ec2-user`)
+
+## Security Best Practices
+
+### Do's ✅
+- Store keys in a password manager
+- Use unique keys for each environment (dev, test, prod)
+- Rotate keys periodically
+- Keep keys backed up securely
+
+### Don'ts ❌
+- Don't commit keys to Git repositories
+- Don't share keys via email or chat
+- Don't reuse keys across multiple engines
+- Don't store keys in plain text files on shared systems
+
+## Troubleshooting
+
+### OpenSSL Not Found
+
+**Problem:** `openssl: command not found`
+
+**Solution:**
+```bash
+# On RHEL/CentOS
+sudo dnf install openssl
+
+# Verify installation
+openssl version
+```
+
+### Different Output Format
+
+**Problem:** Output doesn't match the example
+
+**Solution:**
+- Ensure you're using the exact command: `openssl enc -aes-256-cbc -k secret -P -md sha1`
+- The warning about deprecated key derivation is normal
+- Look for lines starting with `key=` and `iv =`
+
+### Lost Keys
+
+**Problem:** Lost or forgot the encryption keys
+
+**Solution:**
+- Generate new keys using the same command
+- You'll need to redeploy the Remote Engine with the new keys
+- Update the configuration in IBM Cloud
+
+## Next Steps
+
+Now that you have all the required configuration values, you're ready to deploy the Remote Engine:
+
+**[Deploy Remote Engine →](/docs/tutorials/aws-docker-engine/deploy-engine)**
+
+## Summary
+
+In this step, you:
+- ✅ Generated encryption key using OpenSSL
+- ✅ Generated initialization vector (IV)
+- ✅ Saved keys securely
+- ✅ Gathered all required IBM Cloud information
+- ✅ Created a configuration checklist
+- ✅ Prepared for Remote Engine deployment

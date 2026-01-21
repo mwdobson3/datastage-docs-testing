@@ -1,0 +1,271 @@
+---
+sidebar_position: 1
+title: Prerequisites and Setup
+---
+
+# Prerequisites and Setup
+
+⏱️ **Duration:** 10 minutes
+
+Before deploying a DataStage Remote Engine on AWS EKS, ensure you have all the necessary accounts, tools, and permissions.
+
+## Required Accounts
+
+### AWS Account
+You need an AWS account with permissions to:
+- Access or create EKS clusters
+- Configure IAM roles and policies
+- Access EFS (Elastic File System) for storage
+
+:::tip For IBMers
+Use [IBM TechZone](https://techzone.ibm.com/) to provision a pre-configured EKS cluster. Search for "AWS EKS" environments.
+:::
+
+:::info For Customers
+Work with your AWS administrator to provision an EKS cluster or use an existing one. You'll need the cluster name and region.
+:::
+
+### IBM Cloud Account
+You need an IBM Cloud account with:
+- Access to Cloud Pak for Data
+- A DataStage project created
+- Permissions to create Remote Engines
+
+## Required Tools
+
+### kubectl
+Kubernetes command-line tool for cluster management:
+
+**macOS:**
+```bash
+brew install kubectl
+
+# Verify installation
+kubectl version --client
+```
+
+**Linux:**
+```bash
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+# Verify installation
+kubectl version --client
+```
+
+**Windows:**
+```powershell
+# Using Chocolatey
+choco install kubernetes-cli
+
+# Verify installation
+kubectl version --client
+```
+
+### AWS CLI
+AWS command-line interface for EKS access:
+
+**macOS:**
+```bash
+brew install awscli
+
+# Verify installation
+aws --version
+```
+
+**Linux:**
+```bash
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+
+# Verify installation
+aws --version
+```
+
+**Windows:**
+Download and install from: https://aws.amazon.com/cli/
+
+### Git (Optional)
+For cloning the DataStage repository:
+
+```bash
+# macOS
+brew install git
+
+# Linux
+sudo dnf install git  # RHEL/CentOS
+sudo apt install git  # Ubuntu/Debian
+
+# Verify
+git --version
+```
+
+## Required Information
+
+### From IBM Cloud
+
+1. **IBM Cloud API Key**
+   - Navigate to [IBM Cloud API Keys](https://cloud.ibm.com/iam/apikeys)
+   - Click "Create an IBM Cloud API key"
+   - Save the key securely
+
+2. **IBM Cloud Container Registry API Key**
+   - Same as your IBM Cloud API key
+   - Used to pull DataStage container images
+
+3. **Project ID**
+   - Open your Cloud Pak for Data project
+   - Find the Project ID in the project settings
+   - Format: `***REMOVED***`
+
+### From AWS
+
+#### For IBMers (TechZone)
+
+When you provision an EKS cluster from TechZone, you'll receive:
+
+| Item | Description | Example |
+|------|-------------|---------|
+| **AWS_ACCESS_KEY_ID** | Access key for AWS CLI | `AKIAQAKLJF75ATXDSYEX` |
+| **AWS_SECRET_ACCESS_KEY** | Secret key for AWS CLI | `(hidden)` |
+| **Cluster Name** | EKS cluster name | `itzeks-662003sh3b-z6q66xod` |
+| **Region** | AWS region | `us-east-1` |
+| **kubectl Command** | Pre-configured command | `aws eks update-kubeconfig...` |
+
+:::tip TechZone Reservation
+Save all the details from your TechZone reservation email. You'll need them throughout this tutorial.
+:::
+
+#### For Customers
+
+Work with your AWS administrator to obtain:
+
+| Item | Description |
+|------|-------------|
+| **EKS Cluster Name** | Name of your EKS cluster |
+| **AWS Region** | Region where cluster is deployed |
+| **IAM Credentials** | Access credentials for kubectl configuration |
+| **Storage Class** | EFS storage class name (e.g., `efs-sc`) |
+
+## EKS Cluster Requirements
+
+Your EKS cluster should meet these specifications:
+
+| Requirement | Specification |
+|------------|---------------|
+| **Kubernetes Version** | 1.28 or later |
+| **Node Count** | 3-4 nodes minimum |
+| **Node Instance Type** | t3.large or larger (2 vCPU, 8 GB RAM minimum) |
+| **Storage** | EFS file system configured |
+| **Networking** | Outbound internet access for IBM Cloud |
+
+:::info
+The DataStage Remote Engine requires:
+- **Runtime Pod**: 1 pod (always running)
+- **Compute Pods**: 2 pods (for job execution)
+- **Operator Pod**: 1 pod (manages deployment)
+:::
+
+## Storage Requirements
+
+### EFS Storage Class
+
+The Remote Engine requires persistent storage via Amazon EFS:
+
+- **Storage Class Name**: Typically `efs-sc`
+- **Minimum Size**: 20 GB
+- **Access Mode**: ReadWriteMany
+
+:::tip For IBMers
+TechZone EKS clusters come pre-configured with EFS storage class `efs-sc`.
+:::
+
+:::info For Customers
+Ensure your EKS cluster has an EFS CSI driver installed and a storage class configured. Consult your AWS administrator if needed.
+:::
+
+## Network Requirements
+
+### Outbound Access
+Your EKS cluster needs outbound access to:
+- **IBM Cloud**: `*.cloud.ibm.com` (HTTPS/443)
+- **Container Registry**: `icr.io` (HTTPS/443)
+- **DataStage APIs**: `api.dataplatform.cloud.ibm.com` (HTTPS/443)
+
+### No Inbound Access Required
+The Remote Engine initiates all connections to IBM Cloud. No inbound firewall rules are needed.
+
+## Pre-Deployment Checklist
+
+Before proceeding, verify you have:
+
+- [ ] AWS account with EKS cluster access
+- [ ] IBM Cloud account with Cloud Pak for Data access
+- [ ] kubectl installed and working
+- [ ] AWS CLI installed and working
+- [ ] IBM Cloud API key created and saved
+- [ ] IBM Cloud Container Registry API key (same as API key)
+- [ ] Cloud Pak for Data project created
+- [ ] Project ID noted
+- [ ] EKS cluster name and region noted
+- [ ] AWS credentials (access key and secret key)
+- [ ] Storage class name confirmed (e.g., `efs-sc`)
+
+## Next Steps
+
+Once you have all prerequisites ready, proceed to provision or access your EKS cluster:
+
+**[Provision EKS Cluster →](/docs/tutorials/aws-eks-kubernetes/provision-eks)**
+
+## Troubleshooting
+
+### Can't Install kubectl
+
+**Problem:** Installation fails or kubectl not found
+
+**Solution:**
+```bash
+# Verify PATH
+echo $PATH
+
+# Check installation location
+which kubectl
+
+# Try alternative installation method
+# macOS: Download binary directly
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/darwin/amd64/kubectl"
+chmod +x kubectl
+sudo mv kubectl /usr/local/bin/
+```
+
+### AWS CLI Not Working
+
+**Problem:** AWS CLI commands fail
+
+**Solution:**
+```bash
+# Verify installation
+aws --version
+
+# Check configuration
+aws configure list
+
+# Test connection
+aws sts get-caller-identity
+```
+
+### Don't Have EKS Cluster
+
+**Problem:** No EKS cluster available
+
+**Solution:**
+- **IBMers**: Provision from [IBM TechZone](https://techzone.ibm.com/)
+- **Customers**: Contact your AWS administrator or create one using AWS Console/Terraform
+
+## Additional Resources
+
+- [kubectl Documentation](https://kubernetes.io/docs/reference/kubectl/)
+- [AWS CLI Documentation](https://docs.aws.amazon.com/cli/)
+- [Amazon EKS Documentation](https://docs.aws.amazon.com/eks/)
+- [IBM Cloud API Keys](https://cloud.ibm.com/docs/account?topic=account-userapikey)

@@ -1,0 +1,259 @@
+---
+sidebar_position: 2
+title: Provision EKS Cluster
+---
+
+# Provision EKS Cluster
+
+⏱️ **Duration:** 15 minutes
+
+In this step, you'll provision an AWS EKS cluster or access an existing one. Instructions are provided for both IBMers using TechZone and customers with their own AWS accounts.
+
+## Option 1: For IBMers - Use TechZone
+
+:::tip IBMers Only
+This section is for IBM employees using IBM TechZone for testing and development.
+:::
+
+### Step 1: Access IBM TechZone
+
+1. Navigate to [IBM TechZone](https://techzone.ibm.com/)
+2. Log in with your IBM credentials
+3. Click **Environments** in the top menu
+
+### Step 2: Search for EKS Environment
+
+1. In the search bar, type: `AWS EKS`
+2. Look for environments with "EKS" or "Kubernetes" in the title
+3. Select an appropriate environment (e.g., "AWS EKS Cluster")
+
+### Step 3: Create Reservation
+
+1. Click **Reserve** on the selected environment
+2. Fill in the reservation details:
+   - **Purpose**: Select "Practice / Self-Education" or "Test"
+   - **Purpose Description**: "DataStage Remote Engine testing"
+   - **Preferred Geography**: Select "any" or your preferred region
+   - **End Date**: Select appropriate duration (typically 3-7 days)
+
+3. Click **Submit**
+
+### Step 4: Wait for Provisioning
+
+- Provisioning typically takes 30-45 minutes
+- You'll receive an email when the environment is ready
+- The email contains all necessary credentials and connection details
+
+### Step 5: Save Reservation Details
+
+Once provisioned, save these details from your reservation:
+
+```text
+=== TechZone EKS Cluster Details ===
+
+Reservation ID: 69710b04d9fc28e6358e7313
+AWS Region: us-east-1
+Cluster Name: itzeks-662003sh3b-z6q66xod
+
+AWS_ACCESS_KEY_ID: AKIAQAKLJF75ATXDSYEX
+AWS_SECRET_ACCESS_KEY: [from reservation]
+
+kubectl Configuration Command:
+aws eks update-kubeconfig --region us-east-1 --name itzeks-662003sh3b-z6q66xod
+```
+
+:::warning Important
+Save all credentials securely. You'll need them throughout this tutorial.
+:::
+
+## Option 2: For Customers - Use Existing EKS Cluster
+
+:::info For Customers
+This section is for customers using their own AWS accounts and EKS clusters.
+:::
+
+### Prerequisites
+
+Ensure your EKS cluster meets these requirements:
+
+| Requirement | Specification |
+|------------|---------------|
+| **Kubernetes Version** | 1.28 or later |
+| **Node Count** | 3-4 worker nodes |
+| **Node Type** | t3.large or larger |
+| **Storage** | EFS CSI driver installed |
+| **Storage Class** | EFS storage class configured |
+
+### Verify Cluster Access
+
+Work with your AWS administrator to obtain:
+
+1. **Cluster Name**: Name of your EKS cluster
+2. **AWS Region**: Region where cluster is deployed
+3. **IAM Credentials**: Access for kubectl configuration
+4. **Storage Class Name**: Name of the EFS storage class
+
+### Check Cluster Status
+
+If you have access, verify the cluster is ready:
+
+```bash
+# List available clusters
+aws eks list-clusters --region YOUR_REGION
+
+# Describe your cluster
+aws eks describe-cluster --name YOUR_CLUSTER_NAME --region YOUR_REGION
+```
+
+## Option 3: Create New EKS Cluster (Advanced)
+
+:::warning Advanced Users Only
+Creating a new EKS cluster requires AWS expertise and can incur significant costs.
+:::
+
+If you need to create a new EKS cluster, you can use:
+
+### Using AWS Console
+
+1. Navigate to [AWS EKS Console](https://console.aws.amazon.com/eks/)
+2. Click **Add cluster** → **Create**
+3. Follow the cluster creation wizard
+4. Configure:
+   - Cluster name
+   - Kubernetes version (1.28+)
+   - VPC and subnets
+   - Security groups
+5. Add node group with t3.large instances
+6. Install EFS CSI driver
+7. Configure EFS storage class
+
+### Using eksctl (Recommended)
+
+```bash
+# Install eksctl
+brew install eksctl  # macOS
+# or download from: https://eksctl.io/
+
+# Create cluster
+eksctl create cluster \
+  --name datastage-cluster \
+  --region us-east-1 \
+  --nodegroup-name standard-workers \
+  --node-type t3.large \
+  --nodes 3 \
+  --nodes-min 3 \
+  --nodes-max 4 \
+  --managed
+```
+
+### Install EFS CSI Driver
+
+```bash
+# Add EFS CSI driver
+kubectl apply -k "github.com/kubernetes-sigs/aws-efs-csi-driver/deploy/kubernetes/overlays/stable/?ref=master"
+
+# Create storage class
+cat <<EOF | kubectl apply -f -
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: efs-sc
+provisioner: efs.csi.aws.com
+parameters:
+  provisioningMode: efs-ap
+  fileSystemId: fs-XXXXXXXXX  # Your EFS ID
+  directoryPerms: "700"
+EOF
+```
+
+## Verify Cluster Information
+
+Regardless of which option you used, verify you have:
+
+- [ ] Cluster name
+- [ ] AWS region
+- [ ] AWS access credentials (access key and secret key)
+- [ ] Storage class name (typically `efs-sc`)
+
+## Example Configuration
+
+Here's what your cluster information should look like:
+
+```text
+Cluster Name: itzeks-662003sh3b-z6q66xod
+Region: us-east-1
+Storage Class: efs-sc
+Nodes: 4 (t3.large)
+Kubernetes Version: v1.33.5
+```
+
+## Troubleshooting
+
+### TechZone Reservation Fails
+
+**Problem:** Reservation request is denied or fails
+
+**Solution:**
+- Try a different geography
+- Reduce reservation duration
+- Try during off-peak hours
+- Contact TechZone support
+
+### Can't Access Cluster
+
+**Problem:** Don't have cluster access credentials
+
+**Solution:**
+- **IBMers**: Check TechZone reservation email for credentials
+- **Customers**: Contact your AWS administrator
+- Verify IAM permissions for EKS access
+
+### Cluster Not Ready
+
+**Problem:** Cluster shows as not ready
+
+**Solution:**
+```bash
+# Check cluster status
+aws eks describe-cluster --name YOUR_CLUSTER --region YOUR_REGION
+
+# Check node status
+kubectl get nodes
+
+# If nodes not ready, wait a few more minutes
+```
+
+## Cost Considerations
+
+### TechZone (IBMers)
+- No cost to you
+- Automatically deprovisioned after reservation period
+- Limited reservation duration
+
+### Customer AWS Account
+- EKS cluster: ~$0.10/hour
+- Worker nodes: ~$0.08/hour per t3.large node
+- EFS storage: ~$0.30/GB-month
+- **Estimated**: $200-300/month for small cluster
+
+:::tip Cost Savings
+- Use spot instances for worker nodes
+- Stop/delete cluster when not in use
+- Use smaller instance types for development
+
+:::
+
+## Next Steps
+
+Now that you have an EKS cluster provisioned or identified, proceed to configure kubectl access:
+
+**[Configure kubectl Access →](/docs/tutorials/aws-eks-kubernetes/configure-kubectl)**
+
+## Summary
+
+In this step, you:
+- ✅ Provisioned an EKS cluster (TechZone) or identified existing cluster
+- ✅ Saved cluster name and region
+- ✅ Obtained AWS credentials
+- ✅ Verified storage class availability
+- ✅ Prepared for kubectl configuration

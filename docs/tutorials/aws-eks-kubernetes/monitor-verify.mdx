@@ -1,0 +1,386 @@
+---
+sidebar_position: 6
+title: Monitor and Verify Deployment
+---
+
+# Monitor and Verify Deployment
+
+⏱️ **Duration:** 10 minutes
+
+In this final step, you'll monitor the pod deployment, verify everything is running correctly, and configure the Remote Engine in IBM Cloud.
+
+## Monitor Pod Creation
+
+After running the deployment script, pods will be created in stages. Let's monitor their progress.
+
+### Check All Pods
+
+View all pods in the tutorial namespace:
+
+```bash
+kubectl get pods -n tutorial
+```
+
+### Initial State (0-30 seconds)
+
+```
+NAME                                                              READY   STATUS              RESTARTS   AGE
+aws-getting-started-k8s-ibm-datastage-px-runtime-66b6fdf6d6kn4n   0/1     ContainerCreating   0          3s
+ibm-cpd-datastage-remote-operator-54555697b9-mpt5k                1/1     Running             0          33s
+```
+
+- **Operator pod**: Running immediately
+- **Runtime pod**: Being created
+
+### Mid-Stage (2-3 minutes)
+
+```
+NAME                                                              READY   STATUS              RESTARTS   AGE
+aws-getting-started-k8s-ibm-datastage-px-compute-0                0/1     ContainerCreating   0          110s
+aws-getting-started-k8s-ibm-datastage-px-compute-1                0/1     ContainerCreating   0          110s
+aws-getting-started-k8s-ibm-datastage-px-runtime-66b6fdf6d6kn4n   0/1     ContainerCreating   0          115s
+ibm-cpd-datastage-remote-operator-54555697b9-mpt5k                1/1     Running             0          2m25s
+```
+
+- **Compute pods**: Being created (2 pods)
+- **Runtime pod**: Still creating (large image download)
+
+### Pods Running (4-6 minutes)
+
+```
+NAME                                                              READY   STATUS    RESTARTS   AGE
+aws-getting-started-k8s-ibm-datastage-px-compute-0                1/1     Running   0          4m58s
+aws-getting-started-k8s-ibm-datastage-px-compute-1                1/1     Running   0          4m58s
+aws-getting-started-k8s-ibm-datastage-px-runtime-66b6fdf6d6kn4n   1/1     Running   0          5m3s
+ibm-cpd-datastage-remote-operator-54555697b9-mpt5k                1/1     Running   0          5m33s
+```
+
+:::success
+All pods are running! The deployment is progressing.
+:::
+
+## Watch Pods in Real-Time
+
+Use the watch command to monitor pods continuously:
+
+```bash
+watch -n 2 "kubectl get pods -n tutorial"
+```
+
+This updates every 2 seconds. Press `Ctrl+C` to exit.
+
+:::tip
+The runtime pod may take 3-5 minutes to start due to the large container image size (~10-15 GB).
+:::
+
+## Check PXRemoteEngine Status
+
+Monitor the PXRemoteEngine custom resource status:
+
+```bash
+kubectl get pxre -n tutorial
+```
+
+### Status Progression
+
+#### InProgress
+```
+NAME                      VERSION   RECONCILED   STATUS       AGE
+aws-getting-started-k8s                          InProgress   7m29s
+```
+
+The operator is creating and configuring resources.
+
+#### Failed (Temporary)
+```
+NAME                      VERSION   RECONCILED   STATUS   AGE
+aws-getting-started-k8s                          Failed   8m8s
+```
+
+:::info
+A temporary "Failed" status is normal during registration. The operator will retry automatically.
+:::
+
+#### InProgress (Again)
+```
+NAME                      VERSION   RECONCILED   STATUS       AGE
+aws-getting-started-k8s                          InProgress   8m23s
+```
+
+Registration with IBM Cloud is in progress.
+
+#### Completed
+```
+NAME                      VERSION   RECONCILED   STATUS      AGE
+aws-getting-started-k8s             5.3.0        Completed   10m
+```
+
+:::success
+Deployment completed successfully! The Remote Engine is registered with IBM Cloud.
+:::
+
+## Troubleshoot Pod Issues
+
+If pods are stuck or failing, use these commands to diagnose:
+
+### Describe a Pod
+
+```bash
+kubectl describe pod POD_NAME -n tutorial
+```
+
+Replace `POD_NAME` with the actual pod name. Look for:
+- **Events**: Shows what's happening
+- **Conditions**: Pod readiness status
+- **Warnings**: Any issues
+
+### Check Pod Logs
+
+```bash
+kubectl logs POD_NAME -n tutorial
+```
+
+For the runtime pod:
+```bash
+kubectl logs aws-getting-started-k8s-ibm-datastage-px-runtime-XXXXX -n tutorial
+```
+
+### Common Issues
+
+#### ImagePullBackOff
+
+**Problem:** Pod shows `ImagePullBackOff` or `ErrImagePull`
+
+**Solution:**
+```bash
+# Check the pod events
+kubectl describe pod POD_NAME -n tutorial
+
+# Verify secrets exist
+kubectl get secrets -n tutorial
+
+# Check API key is correct in configuration
+cat ~/datastage-config/input_file.txt | grep password
+
+# If incorrect, delete the deployment and redeploy
+kubectl delete pxre aws-getting-started-k8s -n tutorial
+./launch.sh -f ~/datastage-config/input_file.txt
+```
+
+#### Pending State
+
+**Problem:** Pods stuck in `Pending` state
+
+**Solution:**
+```bash
+# Check pod events
+kubectl describe pod POD_NAME -n tutorial
+
+# Common causes:
+# 1. Insufficient resources
+kubectl describe nodes
+
+# 2. Storage class issues
+kubectl get pvc -n tutorial
+kubectl describe pvc PVC_NAME -n tutorial
+
+# 3. Node selector issues
+kubectl get nodes --show-labels
+```
+
+#### CrashLoopBackOff
+
+**Problem:** Pod keeps restarting
+
+**Solution:**
+```bash
+# Check logs
+kubectl logs POD_NAME -n tutorial --previous
+
+# Check resource limits
+kubectl describe pod POD_NAME -n tutorial
+
+# Check for configuration errors
+kubectl get pxre aws-getting-started-k8s -n tutorial -o yaml
+```
+
+## Verify in IBM Cloud
+
+### Step 1: Access DataStage Settings
+
+1. Log in to [IBM Cloud Pak for Data](https://dataplatform.cloud.ibm.com/)
+2. Navigate to your project
+3. Click on the **Manage** tab
+4. In the left sidebar, click **DataStage**
+
+### Step 2: Refresh and Verify
+
+1. Click the refresh button or reload the page
+2. You should see your Remote Engine listed:
+   - **Name**: `aws-getting-started-k8s`
+   - **Status**: Connected/Active
+   - **Type**: Remote
+
+:::success
+Your Remote Engine is now visible in IBM Cloud!
+:::
+
+### Step 3: Configure as Default
+
+1. Select the **Remote** radio button in the Environment section
+2. From the dropdown, select: `aws-getting-started-k8s`
+3. Check **Set as default** (if available)
+4. Click **Save**
+
+### Step 4: View Remote Engine Details
+
+1. Click on the **Remote environments** tab
+2. View detailed information about your engine:
+   - Connection status
+   - Version
+   - Resource allocation
+   - Last heartbeat
+
+## Test the Remote Engine
+
+### Create a Simple Test Job
+
+1. Navigate to your project's **Assets** tab
+2. Click **New asset** → **DataStage flow**
+3. Name it: `test-eks-engine`
+4. Create a simple job:
+   - Add a **Row Generator** stage
+   - Add a **Peek** stage
+   - Connect them
+5. Click **Run**
+
+### Verify Execution
+
+1. Check the job runs successfully
+2. View the job log
+3. Confirm it's running on your Remote Engine (not Cloud Pak for Data)
+
+## Manage Your Remote Engine
+
+### View Engine Status
+
+```bash
+# Check PXRemoteEngine status
+kubectl get pxre -n tutorial
+
+# Check all resources
+kubectl get all -n tutorial
+
+# View detailed status
+kubectl describe pxre aws-getting-started-k8s -n tutorial
+```
+
+### View Logs
+
+```bash
+# Runtime pod logs
+kubectl logs -f aws-getting-started-k8s-ibm-datastage-px-runtime-XXXXX -n tutorial
+
+# Compute pod logs
+kubectl logs -f aws-getting-started-k8s-ibm-datastage-px-compute-0 -n tutorial
+
+# Operator logs
+kubectl logs -f deployment/ibm-cpd-datastage-remote-operator -n tutorial
+```
+
+### Scale Compute Pods
+
+The number of compute pods can be adjusted by modifying the PXRemoteEngine resource:
+
+```bash
+kubectl edit pxre aws-getting-started-k8s -n tutorial
+```
+
+### Delete Remote Engine
+
+To remove the Remote Engine:
+
+```bash
+# Delete the PXRemoteEngine resource
+kubectl delete pxre aws-getting-started-k8s -n tutorial
+
+# Optionally, delete the entire namespace
+kubectl delete namespace tutorial
+```
+
+## Clean Up (Optional)
+
+If you're done testing and want to remove everything:
+
+### Remove from IBM Cloud
+
+1. Go to DataStage settings in your project
+2. Navigate to Remote environments tab
+3. Delete the Remote Engine
+
+### Delete Kubernetes Resources
+
+```bash
+# Delete the PXRemoteEngine
+kubectl delete pxre aws-getting-started-k8s -n tutorial
+
+# Delete the namespace (removes everything)
+kubectl delete namespace tutorial
+```
+
+### Deprovision EKS Cluster
+
+- **IBMers**: TechZone cluster will auto-deprovision after reservation expires
+- **Customers**: Follow your organization's procedures to delete the cluster
+
+## Best Practices
+
+### Monitoring
+- Regularly check pod health: `kubectl get pods -n tutorial`
+- Monitor resource usage: `kubectl top pods -n tutorial`
+- Review logs for errors
+- Check IBM Cloud dashboard for engine status
+
+### Maintenance
+- Keep DataStage repository updated: `git pull` in `~/DataStage`
+- Monitor for Remote Engine version updates in IBM Cloud
+- Review and rotate API keys periodically
+
+### Performance
+- Monitor job execution times
+- Scale compute pods if needed
+- Adjust resource requests/limits based on workload
+- Consider larger node types for production
+
+## Congratulations! 🎉
+
+You've successfully deployed a DataStage Remote Engine on AWS EKS with Kubernetes!
+
+### What You Accomplished
+
+- ✅ Provisioned an AWS EKS cluster
+- ✅ Configured kubectl access
+- ✅ Created configuration file
+- ✅ Deployed DataStage operator
+- ✅ Deployed Remote Engine pods
+- ✅ Registered with IBM Cloud
+- ✅ Verified deployment
+- ✅ Configured in Cloud Pak for Data
+
+### Next Steps
+
+- Create and run DataStage jobs on your Remote Engine
+- Explore advanced configuration options
+- Deploy additional Remote Engines for different environments
+- Implement monitoring and alerting
+
+## Additional Resources
+
+- [DataStage on Kubernetes GitHub](https://github.com/IBM/DataStage/tree/main/RemoteEngine/kubernetes)
+- [Kubernetes Documentation](https://kubernetes.io/docs/)
+- [AWS EKS Documentation](https://docs.aws.amazon.com/eks/)
+- [IBM Cloud Pak for Data](https://www.ibm.com/docs/en/cloud-paks/cp-data)
+
+---
+
+**Need help?** Visit our [community forum](https://community.ibm.com/community/user/datamanagement/) or check the [troubleshooting guide](/docs/tutorials).

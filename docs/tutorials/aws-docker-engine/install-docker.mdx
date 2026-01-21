@@ -1,0 +1,542 @@
+---
+sidebar_position: 3
+title: Install Docker and Configure Storage
+---
+
+# Install Docker and Configure Storage
+
+⏱️ **Duration:** 20 minutes
+
+In this step, you'll install Docker, configure the secondary disk for container storage, and verify everything is working correctly.
+
+## Connect to Your EC2 Instance
+
+First, connect to your EC2 instance via SSH:
+
+```bash
+ssh -i your-key.pem ec2-user@YOUR_PUBLIC_IP
+```
+
+Replace `your-key.pem` and `YOUR_PUBLIC_IP` with your actual values.
+
+## Update System Packages
+
+Update all system packages to ensure you have the latest security patches:
+
+```bash
+sudo dnf -y update
+```
+
+This may take a few minutes.
+
+## Install Required Tools
+
+Install Git and jq (JSON processor):
+
+```bash
+sudo dnf -y install git jq
+```
+
+Verify installation:
+
+```bash
+git --version
+jq --version
+```
+
+## Remove Conflicting Software
+
+Remove Podman and any existing Docker installations to avoid conflicts:
+
+```bash
+sudo dnf remove -y docker \
+                   docker-client \
+                   docker-client-latest \
+                   docker-common \
+                   docker-latest \
+                   docker-latest-logrotate \
+                   docker-logrotate \
+                   docker-engine \
+                   podman \
+                   runc
+```
+
+:::info
+It's normal if some of these packages aren't found. The command ensures a clean slate.
+:::
+
+## Install Docker
+
+### Add Docker Repository
+
+```bash
+# Install DNF plugins
+sudo dnf -y install dnf-plugins-core
+
+# Add Docker CE repository
+sudo dnf config-manager --add-repo https://download.docker.com/linux/rhel/docker-ce.repo
+```
+
+### Install Docker Packages
+
+```bash
+sudo dnf -y install docker-ce \
+                    docker-ce-cli \
+                    containerd.io \
+                    docker-buildx-plugin \
+                    docker-compose-plugin
+```
+
+This installation will take several minutes.
+
+### Add User to Docker Group
+
+Add your user to the docker group to run Docker commands without sudo:
+
+```bash
+sudo usermod -aG docker ec2-user
+```
+
+:::warning Important
+You must log out and log back in for this change to take effect. We'll do this after configuring storage.
+:::
+
+## Configure Secondary Disk
+
+### Verify Secondary Disk
+
+Check that your secondary disk is available:
+
+```bash
+lsblk
+```
+
+You should see `/dev/xvdh` with 100GB:
+
+```
+NAME    MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
+xvda    202:0    0   30G  0 disk 
+└─xvda4 202:4    0 29.3G  0 part /
+xvdh    202:112  0  100G  0 disk 
+```
+
+### Format the Disk
+
+Format the secondary disk with XFS filesystem:
+
+```bash
+sudo mkfs.xfs -f /dev/xvdh
+```
+
+Expected output:
+```
+meta-data=/dev/xvdh              isize=512    agcount=4, agsize=6553600 blks
+         =                       sectsz=512   attr=2, projid32bit=1
+...
+```
+
+### Create Mount Point
+
+Create a directory to mount the disk:
+
+```bash
+sudo mkdir -p /mnt/data
+```
+
+### Mount the Disk
+
+Mount the secondary disk:
+
+```bash
+sudo mount /dev/xvdh /mnt/data
+```
+
+### Set Ownership
+
+Set the correct ownership for the mount point:
+
+```bash
+sudo chown ec2-user:ec2-user /mnt/data
+```
+
+### Make Mount Persistent
+
+Add the disk to `/etc/fstab` so it mounts automatically on reboot:
+
+```bash
+echo "/dev/xvdh /mnt/data xfs defaults 0 0" | sudo tee -a /etc/fstab
+```
+
+### Verify Mount
+
+Check that the disk is mounted correctly:
+
+```bash
+df -h /mnt/data
+```
+
+Expected output:
+```
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/xvdh       100G  746M  100G   1% /mnt/data
+```
+
+## Configure Docker to Use Secondary Disk
+
+### Stop Docker Services
+
+Stop Docker and containerd before configuration:
+
+```bash
+sudo systemctl stop docker
+sudo systemctl stop containerd
+```
+
+### Create Docker Directories
+
+Create directories on the secondary disk for Docker and containerd:
+
+```bash
+sudo mkdir -p /mnt/data/docker
+sudo mkdir -p /mnt/data/containerd
+```
+
+### Remove Old Data
+
+Remove any existing Docker data from the default location:
+
+```bash
+sudo rm -rf /var/lib/docker
+sudo rm -rf /var/lib/containerd
+```
+
+### Configure Docker Daemon
+
+Create Docker configuration file:
+
+```bash
+sudo mkdir -p /etc/docker
+
+cat << 'EOF' | sudo tee /etc/docker/daemon.json
+{
+  "data-root": "/mnt/data/docker",
+  "storage-driver": "overlay2"
+}
+EOF
+```
+
+Verify the configuration:
+
+```bash
+cat /etc/docker/daemon.json
+```
+
+### Configure Containerd
+
+Create containerd configuration directory:
+
+```bash
+sudo mkdir -p /etc/containerd
+```
+
+Generate and modify containerd configuration:
+
+```bash
+# Generate default config
+sudo containerd config default | sudo tee /etc/containerd/config.toml > /dev/null
+
+# Update the root path to use secondary disk
+sudo sed -i 's|root = "/var/lib/containerd"|root = "/mnt/data/containerd"|g' /etc/containerd/config.toml
+```
+
+Verify the containerd configuration:
+
+```bash
+grep "^root = " /etc/containerd/config.toml
+```
+
+Expected output:
+```
+root = "/mnt/data/containerd"
+```
+
+### Set Permissions
+
+Set correct permissions on the directories:
+
+```bash
+sudo chown -R root:root /mnt/data/docker
+sudo chown -R root:root /mnt/data/containerd
+sudo chmod -R 755 /mnt/data/docker
+sudo chmod -R 755 /mnt/data/containerd
+```
+
+## Start Docker Services
+
+### Reload Systemd
+
+Reload systemd to recognize configuration changes:
+
+```bash
+sudo systemctl daemon-reload
+```
+
+### Start Containerd
+
+Start the containerd service:
+
+```bash
+sudo systemctl start containerd
+sudo systemctl enable containerd
+```
+
+Wait a few seconds for containerd to fully start.
+
+### Start Docker
+
+Start the Docker service:
+
+```bash
+sudo systemctl start docker
+sudo systemctl enable docker
+```
+
+Wait a few seconds for Docker to fully start.
+
+### Verify Services
+
+Check that both services are running:
+
+```bash
+sudo systemctl is-active docker
+sudo systemctl is-active containerd
+```
+
+Both should return `active`.
+
+## Verify Docker Configuration
+
+### Check Docker Root Directory
+
+Verify Docker is using the secondary disk:
+
+```bash
+sudo docker info | grep "Docker Root Dir"
+```
+
+Expected output:
+```
+Docker Root Dir: /mnt/data/docker
+```
+
+### Test Docker
+
+Pull a test image to verify Docker is working:
+
+```bash
+sudo docker pull hello-world
+```
+
+Expected output:
+```
+Using default tag: latest
+latest: Pulling from library/hello-world
+...
+Status: Downloaded newer image for hello-world:latest
+```
+
+### Verify Storage Usage
+
+Check that data is being written to the secondary disk:
+
+```bash
+sudo du -sh /mnt/data/docker
+sudo du -sh /mnt/data/containerd
+```
+
+You should see some data usage (a few MB at minimum).
+
+### Verify Root Disk is Clean
+
+Confirm that `/var/lib/docker` and `/var/lib/containerd` don't exist:
+
+```bash
+ls -la /var/lib/ | grep -E "docker|containerd"
+```
+
+This should return no results (empty).
+
+## Apply Docker Group Changes
+
+Now log out and log back in for the docker group changes to take effect:
+
+```bash
+exit
+```
+
+Reconnect:
+
+```bash
+ssh -i your-key.pem ec2-user@YOUR_PUBLIC_IP
+```
+
+### Test Docker Without Sudo
+
+Verify you can run Docker commands without sudo:
+
+```bash
+docker ps
+```
+
+Expected output:
+```
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+```
+
+:::success
+Docker is now installed and configured correctly!
+:::
+
+## Clone DataStage Repository
+
+Clone the IBM DataStage repository which contains the remote engine deployment scripts:
+
+```bash
+cd ~
+git clone https://github.com/IBM/DataStage.git
+```
+
+Navigate to the Docker engine directory:
+
+```bash
+cd DataStage/RemoteEngine/docker/
+```
+
+Verify the contents:
+
+```bash
+ls -l
+```
+
+You should see:
+```
+-rwxr-xr-x 1 ec2-user ec2-user 45678 ... dsengine.sh
+-rw-r--r-- 1 ec2-user ec2-user  5432 ... README.md
+...
+```
+
+Make sure `dsengine.sh` is executable:
+
+```bash
+chmod +x dsengine.sh
+```
+
+## Verify Complete Setup
+
+Run a final verification of your setup:
+
+```bash
+# Check Docker version
+docker version
+
+# Check disk space
+df -h /mnt/data
+
+# Check current directory
+pwd
+```
+
+Expected `pwd` output:
+```
+/home/ec2-user/DataStage/RemoteEngine/docker
+```
+
+## Troubleshooting
+
+### Docker Service Won't Start
+
+**Problem:** Docker fails to start
+
+**Solution:**
+```bash
+# Check Docker logs
+sudo journalctl -u docker -n 50
+
+# Check containerd logs
+sudo journalctl -u containerd -n 50
+
+# Verify configuration
+sudo docker info
+```
+
+### Permission Denied Errors
+
+**Problem:** Can't run docker commands without sudo
+
+**Solution:**
+```bash
+# Verify you're in the docker group
+groups
+
+# If not, add yourself again
+sudo usermod -aG docker ec2-user
+
+# Log out and back in
+exit
+# Then reconnect via SSH
+```
+
+### Disk Not Mounting
+
+**Problem:** `/mnt/data` not available after reboot
+
+**Solution:**
+```bash
+# Check fstab entry
+cat /etc/fstab | grep xvdh
+
+# Manually mount
+sudo mount -a
+
+# Check mount
+df -h /mnt/data
+```
+
+### Containerd Configuration Issues
+
+**Problem:** Containerd not using secondary disk
+
+**Solution:**
+```bash
+# Check configuration
+grep "^root = " /etc/containerd/config.toml
+
+# If incorrect, edit manually
+sudo vi /etc/containerd/config.toml
+# Find: root = "/var/lib/containerd"
+# Change to: root = "/mnt/data/containerd"
+
+# Restart containerd
+sudo systemctl restart containerd
+sudo systemctl restart docker
+```
+
+## Next Steps
+
+Your Docker environment is now ready for the DataStage Remote Engine. Proceed to generate encryption keys:
+
+**[Generate Encryption Keys →](/docs/tutorials/aws-docker-engine/generate-keys)**
+
+## Summary
+
+In this step, you:
+- ✅ Updated system packages
+- ✅ Installed Git and jq
+- ✅ Removed conflicting software
+- ✅ Installed Docker CE and containerd
+- ✅ Formatted and mounted the secondary disk
+- ✅ Configured Docker to use secondary disk storage
+- ✅ Configured containerd to use secondary disk storage
+- ✅ Verified Docker is working correctly
+- ✅ Cloned the DataStage repository
+- ✅ Prepared for Remote Engine deployment

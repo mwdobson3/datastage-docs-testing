@@ -1,0 +1,320 @@
+---
+sidebar_position: 5
+title: Deploy Remote Engine
+---
+
+# Deploy Remote Engine
+
+⏱️ **Duration:** 10 minutes
+
+In this step, you'll use the IBM Cloud Pak for Data interface to generate a deployment script, then run it on your EC2 instance to deploy the DataStage Remote Engine.
+
+## Generate Deployment Script in IBM Cloud
+
+### Step 1: Access DataStage Settings
+
+1. Log in to [IBM Cloud Pak for Data](https://dataplatform.cloud.ibm.com/)
+2. Navigate to your project
+3. Click on the **Manage** tab
+4. In the left sidebar, click **DataStage**
+
+### Step 2: Select Remote Engine Option
+
+1. Select the **Remote** radio button
+2. Click on the blue **installation script** link
+
+![DataStage Remote Engine Setup](https://via.placeholder.com/800x400?text=DataStage+Remote+Engine+Setup)
+
+### Step 3: Configure Required Fields
+
+Fill in the required configuration fields:
+
+| Field | Value | Example |
+|-------|-------|---------|
+| **Remote environment name** | Your chosen engine name | `aws-getting-started` |
+| **Cloud API key** | Your IBM Cloud API key | `***REMOVED***` |
+| **Encryption key** | Generated encryption key | `114FD1E2163B412DEF208113F2A66739E148D120E2D8CD26503421946FB9CACF` |
+| **Encryption IV** | Generated initialization vector | `33DE46A74DCB8B4A405698B14F7837B9` |
+| **IBM Cloud container registry API key** | Your IBM Cloud API key | `***REMOVED***` |
+
+:::tip
+Use the values you saved in the previous step. Don't use the example values shown here!
+:::
+
+### Step 4: Configure Optional Flags
+
+Click on the **Optional start flags** tab and configure:
+
+| Field | Value | Notes |
+|-------|-------|-------|
+| **Maximum memory (GB)** | `4` | Default is fine for most cases |
+| **Maximum CPUs** | `2` | Default is fine for most cases |
+| **Set user** | `ec2-user` | **Important:** Must match your EC2 user |
+| **Volume Directory** | `/mnt/data/` | **Important:** Must match your mount point |
+| **Environment home** | `IBM Cloud Dallas (us-south)` | Or your preferred region |
+
+:::warning Critical Settings
+- **Set user**: Must be `ec2-user` (the user running Docker)
+- **Volume Directory**: Must be `/mnt/data/` (your secondary disk mount point)
+:::
+
+### Step 5: Generate Script
+
+1. Click the blue **Generate script** button
+2. Scroll down to see the generated script
+3. The script will look similar to this:
+
+```bash
+./dsengine.sh start -n "aws-getting-started" \
+                    -a "YOUR_API_KEY" \
+                    -e "YOUR_ENCRYPTION_KEY" \
+                    -i "YOUR_ENCRYPTION_IV" \
+                    -p "YOUR_REGISTRY_KEY" \
+                    --project-id "YOUR_PROJECT_ID" \
+                    --volume-dir "/mnt/data/" \
+                    --set-user "ec2-user"
+```
+
+### Step 6: Copy the Script
+
+1. **Copy only the command** starting with `./dsengine.sh start`
+2. **Do NOT copy** any text above the command
+3. **Do NOT copy** the final backslash `\` if it's on its own line
+
+:::tip
+Select from `./dsengine.sh` through `"ec2-user"` (the last parameter value).
+:::
+
+## Deploy on EC2 Instance
+
+### Step 1: Connect to EC2
+
+If not already connected, SSH to your EC2 instance:
+
+```bash
+ssh -i your-key.pem ec2-user@YOUR_PUBLIC_IP
+```
+
+### Step 2: Navigate to Engine Directory
+
+Ensure you're in the correct directory:
+
+```bash
+cd ~/DataStage/RemoteEngine/docker/
+pwd
+```
+
+Expected output:
+```
+/home/ec2-user/DataStage/RemoteEngine/docker
+```
+
+### Step 3: Run Deployment Script
+
+Paste and run the deployment script you copied from IBM Cloud:
+
+```bash
+./dsengine.sh start -n "aws-getting-started" \
+                    -a "YOUR_API_KEY" \
+                    -e "YOUR_ENCRYPTION_KEY" \
+                    -i "YOUR_ENCRYPTION_IV" \
+                    -p "YOUR_REGISTRY_KEY" \
+                    --project-id "YOUR_PROJECT_ID" \
+                    --volume-dir "/mnt/data/" \
+                    --set-user "ec2-user"
+```
+
+:::warning
+Replace all placeholder values with your actual values!
+:::
+
+## Monitor Deployment Progress
+
+The deployment process will take approximately 5-10 minutes. You'll see several stages:
+
+### Stage 1: Initialization
+```
+IBM DataStage Remote Engine 1.0.32
+
+DATASTAGE_HOME=https://dataplatform.cloud.ibm.com
+GATEWAY_URL=https://api.dataplatform.cloud.ibm.com
+PROJECT_IDS=***REMOVED***
+REMOTE_ENGINE_PREFIX=aws-getting-started
+...
+```
+
+### Stage 2: Docker Image Download
+```
+Checking docker images ...
+Getting IAM token to access Container Registry
+Getting PX Version from Cloud Container Registry
+...
+Docker login to DataStage Container Registry.
+Login Succeeded
+Image icr.io/datastage/ds-px-runtime@sha256:... does not exist locally, proceeding to download
+docker pull icr.io/datastage/ds-px-runtime@sha256:...
+```
+
+This stage downloads the DataStage runtime image (~10-15 GB). It may take several minutes depending on your network speed.
+
+### Stage 3: Container Startup
+```
+Initializing DataStage Remote Engine Runtime environment with name 'aws-getting-started' ...
+Setting up docker environment
+
+Starting instance 'aws-getting-started' ...
+Running container 'aws-getting-started_runtime' ...
+Using user 1000 to run the container
+```
+
+You'll see periodic status updates:
+```
+waiting for aws-getting-started_runtime to start... time elapsed: 0 seconds
+waiting for aws-getting-started_runtime to start... time elapsed: 5 seconds
+...
+waiting for aws-getting-started_runtime to start... time elapsed: 100 seconds
+```
+
+### Stage 4: Health Check
+```
+{"service_name":"ds-px-runtime","status":"ok","timestamp":"2026-01-21T18:05:05.641Z","version":"1.1.2525","px_version":"develop-11.7.1-2025.12.19.05.32.48","connector_version":"cpd-cpd-5.0-194-"}
+Started container aws-getting-started_runtime in 100 seconds
+```
+
+### Stage 5: Registration
+```
+Finalizing Remote Engine instance 'aws-getting-started'...
+Confirming Remote Engine registration ...
+Got remote engine 'aws-getting-started' registration with id: 4a275866-8be1-42ab-b7bf-c0cd48e17105
+
+Setting up Runtime environment using Remote Engine 'aws-getting-started' ...
+Created environment runtime with id: c51c0048-4b67-4cde-8160-69de96942897
+Runtime Environment 'Remote Engine aws-getting-started' is registered for project ***REMOVED***.
+```
+
+### Stage 6: Completion
+```
+Setup complete
+
+Project settings:
+* https://dataplatform.cloud.ibm.com/projects/YOUR_PROJECT_ID/manage/tool-configurations/datastage_admin_settings_section?context=cpdaas
+
+Project assets:
+* https://dataplatform.cloud.ibm.com/projects/YOUR_PROJECT_ID/assets?context=cpdaas
+
+Remote engine is setup. You can navigate to the project settings and select this engine to be used by the project.
+
+Remote Engine setup completed.
+```
+
+:::success
+Deployment successful! Your Remote Engine is now running.
+:::
+
+## Verify Container is Running
+
+Check that the Docker container is running:
+
+```bash
+docker ps
+```
+
+Expected output:
+```
+CONTAINER ID   IMAGE                            COMMAND                  CREATED         STATUS                   PORTS      NAMES
+975b01b5bf61   icr.io/datastage/ds-px-runtime   "/bin/bash -c /px-st…"   2 minutes ago   Up 2 minutes (healthy)   9443/tcp   aws-getting-started_runtime
+```
+
+Key indicators:
+- **STATUS**: Should show `Up X minutes (healthy)`
+- **NAMES**: Should match your engine name with `_runtime` suffix
+
+## Check Container Logs (Optional)
+
+View the container logs to ensure everything is running smoothly:
+
+```bash
+docker logs aws-getting-started_runtime
+```
+
+Look for messages indicating successful startup and connection to IBM Cloud.
+
+## Troubleshooting
+
+### Image Download Fails
+
+**Problem:** Error downloading container image
+
+**Solution:**
+```bash
+# Verify internet connectivity
+ping -c 3 icr.io
+
+# Check Docker login
+docker login icr.io -u iamapikey -p YOUR_REGISTRY_API_KEY
+
+# Retry deployment
+./dsengine.sh start -n "your-engine-name" ...
+```
+
+### Container Won't Start
+
+**Problem:** Container fails health check or won't start
+
+**Solution:**
+```bash
+# Check Docker logs
+docker logs aws-getting-started_runtime
+
+# Check disk space
+df -h /mnt/data
+
+# Verify permissions
+ls -la /mnt/data/
+
+# Check Docker service
+sudo systemctl status docker
+```
+
+### Permission Errors
+
+**Problem:** Permission denied errors during deployment
+
+**Solution:**
+```bash
+# Verify you're in the docker group
+groups
+
+# Check volume directory permissions
+ls -la /mnt/data/
+
+# Ensure correct user is set
+# Re-run with --set-user "ec2-user"
+```
+
+### Registration Fails
+
+**Problem:** Remote Engine registration fails
+
+**Solution:**
+- Verify your IBM Cloud API key is correct
+- Check your Project ID is correct
+- Ensure your EC2 instance has outbound internet access
+- Verify encryption key and IV are correct
+
+## Next Steps
+
+Your Remote Engine is deployed and running! Now configure it in IBM Cloud:
+
+**[Verify and Configure in IBM Cloud →](/docs/tutorials/aws-docker-engine/verify-configure)**
+
+## Summary
+
+In this step, you:
+- ✅ Generated deployment script in IBM Cloud interface
+- ✅ Configured required and optional parameters
+- ✅ Deployed the Remote Engine on EC2
+- ✅ Downloaded DataStage container image
+- ✅ Started the Remote Engine container
+- ✅ Registered the engine with IBM Cloud
+- ✅ Verified the container is running and healthy

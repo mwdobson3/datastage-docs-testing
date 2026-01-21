@@ -1,0 +1,258 @@
+---
+sidebar_position: 5
+title: Deploy Remote Engine
+---
+
+# Deploy Remote Engine
+
+⏱️ **Duration:** 10 minutes
+
+In this step, you'll run the deployment script to install the DataStage Remote Engine on your EKS cluster.
+
+## Navigate to Kubernetes Directory
+
+Ensure you're in the correct directory:
+
+```bash
+cd ~/DataStage/RemoteEngine/kubernetes
+pwd
+```
+
+Expected output:
+```
+/Users/username/DataStage/RemoteEngine/kubernetes
+```
+
+## Run Deployment Script
+
+Execute the launch script with your configuration file:
+
+```bash
+./launch.sh -f ~/datastage-config/input_file.txt
+```
+
+:::tip
+If you stored your configuration file in a different location, adjust the path accordingly.
+:::
+
+## Monitor Deployment Progress
+
+The deployment process has several stages. Here's what you'll see:
+
+### Stage 1: Initialization
+
+```
+IBM DataStage Remote Engine 1.0.13
+/opt/homebrew/bin/kubectl
+Setting Kubernetes cli to 'kubectl'
+```
+
+The script verifies:
+- kubectl is installed
+- Namespace exists
+- Configuration is valid
+
+### Stage 2: Create Secrets
+
+```
+secret/datastage-pull-secret created
+secret/datastage-api-key-secret created
+```
+
+The script creates Kubernetes secrets for:
+- Container registry authentication
+- IBM Cloud API key
+
+### Stage 3: Retrieve Container Images
+
+```
+DOCKER_REGISTRY=icr.io
+OPERATOR_REGISTRY=icr.io/datastage
+DOCKER_REGISTRY_PREFIX=icr.io/datastage
+Retrieving latest digest for ds-operator.
+Retrieved digest for ds-operator: sha256:ad18875c665bccdd119d29151e681c1df9ce3ea097b18f1aabd1c9f3acaf578e
+Retrieving latest digest for ds-px-runtime.
+Retrieved digest for ds-px-runtime: sha256:b668e04c60d2c2efb5de20d30c20450127f631217d3863e2ea2575139ff322f1
+Retrieving latest digest for ds-px-compute.
+Retrieved digest for ds-px-compute: sha256:376bc6e58f90c920628b41228c3e7c592adcc4d17f1b5ce8c3e4133a2e26b7fc
+```
+
+The script retrieves the latest container image digests from IBM Cloud Container Registry.
+
+### Stage 4: Deploy Operator
+
+```
+Deploying DataStage operator to namespace tutorial...
+serviceaccount/ibm-cpd-datastage-remote-operator-serviceaccount created
+role.rbac.authorization.k8s.io/ibm-cpd-datastage-remote-operator-role created
+rolebinding.rbac.authorization.k8s.io/ibm-cpd-datastage-remote-operator-role-binding created
+customresourcedefinition.apiextensions.k8s.io/pxremoteengines.ds.cpd.ibm.com created
+deployment.apps/ibm-cpd-datastage-remote-operator created
+DataStage operator deployment created.
+```
+
+The operator manages the Remote Engine lifecycle.
+
+### Stage 5: Create PXRemoteEngine Resource
+
+```
+Error from server (NotFound): pxremoteengines.ds.cpd.ibm.com "aws-getting-started-k8s" not found
+pxremoteengine.ds.cpd.ibm.com/aws-getting-started-k8s created
+To check the status of the PXRemoteEngine instance, run the command below:
+kubectl -n tutorial get pxre aws-getting-started-k8s
+```
+
+:::info
+The "NotFound" error is expected - it's checking if the resource already exists before creating it.
+:::
+
+### Deployment Complete
+
+```
+To check the status of the PXRemoteEngine instance, run the command below:
+kubectl -n tutorial get pxre aws-getting-started-k8s
+```
+
+:::success
+Deployment script completed successfully!
+:::
+
+## Verify Deployment Started
+
+Check that the deployment has started:
+
+```bash
+kubectl get pxre -n tutorial
+```
+
+Initial output:
+```
+NAME                      VERSION   RECONCILED   STATUS       AGE
+aws-getting-started-k8s                          InProgress   10s
+```
+
+The STATUS will show `InProgress` while pods are being created.
+
+## Troubleshooting Deployment
+
+### Namespace Not Found Error
+
+**Problem:** `Error from server (NotFound): namespaces "tutorial" not found`
+
+**Solution:**
+```bash
+# Create the namespace
+kubectl create namespace tutorial
+
+# Run the deployment script again
+./launch.sh -f ~/datastage-config/input_file.txt
+```
+
+### Permission Denied
+
+**Problem:** `./launch.sh: Permission denied`
+
+**Solution:**
+```bash
+# Make the script executable
+chmod +x launch.sh
+
+# Run again
+./launch.sh -f ~/datastage-config/input_file.txt
+```
+
+### Configuration File Not Found
+
+**Problem:** `No such file or directory`
+
+**Solution:**
+```bash
+# Verify the file exists
+ls -l ~/datastage-config/input_file.txt
+
+# If not, check the path or recreate the file
+# Then run the script with the correct path
+./launch.sh -f /correct/path/to/input_file.txt
+```
+
+### Authentication Errors
+
+**Problem:** `Error: unable to pull image` or authentication failures
+
+**Solution:**
+```bash
+# Verify your IBM Cloud API key is correct
+# Check the configuration file
+cat ~/datastage-config/input_file.txt | grep -E "api_key|password"
+
+# Ensure the keys are valid and not expired
+# Update the configuration file if needed
+# Run the deployment script again
+```
+
+### Storage Class Not Found
+
+**Problem:** `storageclass.storage.k8s.io "efs-sc" not found`
+
+**Solution:**
+```bash
+# Check available storage classes
+kubectl get storageclass
+
+# Update your configuration file with the correct storage class name
+# Common alternatives: gp2, gp3, efs-sc, nfs-client
+
+# Edit the configuration
+nano ~/datastage-config/input_file.txt
+# Change: storage_class=correct-storage-class-name
+
+# Run the deployment script again
+./launch.sh -f ~/datastage-config/input_file.txt
+```
+
+## What Happens Next
+
+After the deployment script completes:
+
+1. **Operator Pod** starts first (30 seconds)
+2. **Runtime Pod** is created by the operator (2-3 minutes)
+3. **Compute Pods** are created (2-3 minutes)
+4. **Registration** with IBM Cloud begins (5-10 minutes)
+
+The entire process takes approximately **10-15 minutes** to complete.
+
+## Check Deployment Status
+
+You can monitor the deployment status with:
+
+```bash
+# Check PXRemoteEngine status
+kubectl get pxre -n tutorial
+
+# Check all pods
+kubectl get pods -n tutorial
+
+# Watch pods in real-time
+watch -n 2 "kubectl get pods -n tutorial"
+```
+
+:::tip
+Press `Ctrl+C` to exit the watch command.
+:::
+
+## Next Steps
+
+Now that the deployment has started, proceed to monitor the pod creation and verify the deployment:
+
+**[Monitor and Verify Deployment →](/docs/tutorials/aws-eks-kubernetes/monitor-verify)**
+
+## Summary
+
+In this step, you:
+- ✅ Navigated to the Kubernetes deployment directory
+- ✅ Ran the launch script with your configuration
+- ✅ Created Kubernetes secrets for authentication
+- ✅ Deployed the DataStage operator
+- ✅ Created the PXRemoteEngine custom resource
+- ✅ Initiated the Remote Engine deployment
+- ✅ Verified deployment started successfully
