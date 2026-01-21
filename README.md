@@ -2,7 +2,7 @@
 
 A modern documentation site for IBM DataStage Anywhere, built with Docusaurus and featuring IBM Design Language theming with HashiCorp-style interactive tutorials.
 
-## 🚀 Features
+## Features
 
 - **IBM Design Language** - IBM Blue color scheme and IBM Plex fonts
 - **Interactive Tutorials** - Progress tracking with localStorage
@@ -10,18 +10,18 @@ A modern documentation site for IBM DataStage Anywhere, built with Docusaurus an
 - **Responsive Design** - Mobile-friendly with dark mode
 - **Tutorial Checklist** - Track your learning progress across sessions
 
-## 📋 Prerequisites
+## Prerequisites
 
-- Node.js 18.0 or higher
+- Node.js 20.0 or higher
 - npm or yarn
 
-## 🛠️ Installation
+## Installation
 
 ```bash
 npm install
 ```
 
-## 🏃 Local Development
+## Local Development
 
 ```bash
 npm start
@@ -29,7 +29,7 @@ npm start
 
 This starts a local development server at `http://localhost:3000`. Most changes are reflected live without restarting the server.
 
-## 🏗️ Build
+## Build
 
 ```bash
 npm run build
@@ -37,7 +37,7 @@ npm run build
 
 Generates static content into the `build` directory that can be served using any static hosting service.
 
-## 📦 Deployment
+## Deployment
 
 ### GitHub Pages
 
@@ -53,7 +53,7 @@ npm run deploy
 
 For detailed deployment instructions, see [DEPLOYMENT.md](./DEPLOYMENT.md).
 
-## 📚 Documentation Structure
+## Documentation Structure
 
 ```
 docs/
@@ -68,7 +68,7 @@ docs/
         └── monitor-troubleshoot.mdx
 ```
 
-## 🎨 Customization
+## Customization
 
 ### Theme Colors
 
@@ -86,7 +86,7 @@ Edit `src/css/custom.css` to customize the IBM Blue theme:
 
 The `TutorialChecklist` component automatically saves progress to localStorage. Each tutorial collection has a unique ID for tracking.
 
-## 🧩 Components
+## Components
 
 ### TutorialChecklist
 
@@ -117,11 +117,11 @@ import VideoEmbed from '@site/src/components/VideoEmbed';
 />
 ```
 
-## 📖 Implementation Guide
+## Implementation Guide
 
 For detailed information about the architecture and customization options, see [IMPLEMENTATION-GUIDE.md](./IMPLEMENTATION-GUIDE.md).
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch
@@ -130,17 +130,17 @@ For detailed information about the architecture and customization options, see [
 5. Build to verify: `npm run build`
 6. Submit a pull request
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License.
 
-## 🔗 Links
+## Links
 
 - [Docusaurus Documentation](https://docusaurus.io/)
 - [IBM Design Language](https://www.ibm.com/design/language/)
 - [DataStage Documentation](https://www.ibm.com/docs/en/cloud-paks/cp-data/4.8.x?topic=services-datastage)
 
-## 🆘 Support
+## Support
 
 For issues or questions:
 - Check the [IMPLEMENTATION-GUIDE.md](./IMPLEMENTATION-GUIDE.md) for troubleshooting

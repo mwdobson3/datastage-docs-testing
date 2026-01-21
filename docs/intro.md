@@ -2,46 +2,82 @@
 sidebar_position: 1
 ---
 
-# Tutorial Intro
+# Welcome to DataStage Anywhere
 
-Let's discover **Docusaurus in less than 5 minutes**.
+DataStage Anywhere enables you to deploy IBM DataStage Remote Engines on Kubernetes clusters, providing flexible data integration capabilities across hybrid and multi-cloud environments.
+
+## What is DataStage Anywhere?
+
+DataStage Anywhere extends IBM Cloud Pak for Data's DataStage capabilities by allowing you to run data integration workloads on remote Kubernetes clusters. This architecture provides:
+
+- **Flexibility**: Deploy engines where your data resides
+- **Scalability**: Leverage Kubernetes for dynamic resource allocation
+- **Security**: Keep sensitive data within your network boundaries
+- **Performance**: Reduce data movement by processing data locally
+
+## Key Capabilities
+
+### Remote Engine Deployment
+Deploy DataStage engines on any Kubernetes cluster, including:
+- Red Hat OpenShift
+- Amazon EKS
+- Azure AKS
+- Google GKE
+- On-premises Kubernetes
+
+### Centralized Management
+Manage all your remote engines from a single Cloud Pak for Data control plane:
+- Monitor engine health and performance
+- Deploy and update jobs remotely
+- Track job execution across all engines
+- Centralized logging and auditing
+
+### Enterprise Integration
+Connect to diverse data sources and targets:
+- Cloud databases and data warehouses
+- On-premises databases
+- File systems and object storage
+- SaaS applications
+- Streaming data sources
 
 ## Getting Started
 
-Get started by **creating a new site**.
+Ready to deploy your first remote engine? Follow our step-by-step tutorial:
 
-Or **try Docusaurus immediately** with **[docusaurus.new](https://docusaurus.new)**.
+**[Get Started with DataStage Anywhere →](/docs/tutorials/get-started)**
 
-### What you'll need
+The tutorial covers:
+1. Installing prerequisites
+2. Deploying a remote engine
+3. Connecting to Cloud Pak for Data
+4. Running your first job
+5. Monitoring and troubleshooting
 
-- [Node.js](https://nodejs.org/en/download/) version 20.0 or above:
-  - When installing Node.js, you are recommended to check all checkboxes related to dependencies.
+## Architecture Overview
 
-## Generate a new site
+DataStage Anywhere uses a hub-and-spoke architecture:
 
-Generate a new Docusaurus site using the **classic template**.
+- **Control Plane**: Cloud Pak for Data instance managing metadata, job definitions, and orchestration
+- **Remote Engines**: Kubernetes-based execution environments running DataStage jobs
+- **Secure Communication**: TLS-encrypted connections between control plane and engines
 
-The classic template will automatically be added to your project after you run the command:
+## Documentation Structure
 
-```bash
-npm init docusaurus@latest my-website classic
-```
+- **Tutorials**: Step-by-step guides for common tasks
+- **How-To Guides**: Task-oriented instructions
+- **Reference**: Technical specifications and API documentation
+- **Concepts**: Understanding DataStage Anywhere architecture
 
-You can type this command into Command Prompt, Powershell, Terminal, or any other integrated terminal of your code editor.
+## Support and Resources
 
-The command also installs all necessary dependencies you need to run Docusaurus.
+- [IBM DataStage Documentation](https://www.ibm.com/docs/en/cloud-paks/cp-data/4.8.x?topic=services-datastage)
+- [Cloud Pak for Data Documentation](https://www.ibm.com/docs/en/cloud-paks/cp-data)
+- [IBM Support](https://www.ibm.com/support)
 
-## Start your site
+## Next Steps
 
-Run the development server:
+Begin your DataStage Anywhere journey:
 
-```bash
-cd my-website
-npm run start
-```
-
-The `cd` command changes the directory you're working with. In order to work with your newly created Docusaurus site, you'll need to navigate the terminal there.
-
-The `npm run start` command builds your website locally and serves it through a development server, ready for you to view at http://localhost:3000/.
-
-Open `docs/intro.md` (this page) and edit some lines: the site **reloads automatically** and displays your changes.
+1. Review the [prerequisites](/docs/tutorials/get-started/install-prerequisites)
+2. Follow the [deployment guide](/docs/tutorials/get-started/deploy-engine)
+3. Explore advanced configuration options
