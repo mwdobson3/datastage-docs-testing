@@ -1,5 +1,6 @@
 ---
 sidebar_position: 1
+title: Welcome to DataStage Anywhere
 ---
 
 # Welcome to DataStage Anywhere
@@ -42,16 +43,13 @@ Connect to diverse data sources and targets:
 
 ## Getting Started
 
-Ready to deploy your first remote engine? Follow our step-by-step tutorial:
+Ready to get started with DataStage Anywhere?
 
-**[Get Started with DataStage Anywhere →](/docs/tutorials/get-started)**
-
-The tutorial covers:
-1. Installing prerequisites
-2. Deploying a remote engine
-3. Connecting to Cloud Pak for Data
-4. Running your first job
-5. Monitoring and troubleshooting
+<div style={{marginTop: '2rem'}}>
+  <a href="/docs/tutorials" className="button button--primary button--lg">
+    Go to Tutorials →
+  </a>
+</div>
 
 ## Architecture Overview
 
@@ -61,23 +59,8 @@ DataStage Anywhere uses a hub-and-spoke architecture:
 - **Remote Engines**: Kubernetes-based execution environments running DataStage jobs
 - **Secure Communication**: TLS-encrypted connections between control plane and engines
 
-## Documentation Structure
-
-- **Tutorials**: Step-by-step guides for common tasks
-- **How-To Guides**: Task-oriented instructions
-- **Reference**: Technical specifications and API documentation
-- **Concepts**: Understanding DataStage Anywhere architecture
-
 ## Support and Resources
 
 - [IBM DataStage Documentation](https://www.ibm.com/docs/en/cloud-paks/cp-data/4.8.x?topic=services-datastage)
 - [Cloud Pak for Data Documentation](https://www.ibm.com/docs/en/cloud-paks/cp-data)
 - [IBM Support](https://www.ibm.com/support)
-
-## Next Steps
-
-Begin your DataStage Anywhere journey:
-
-1. Review the [prerequisites](/docs/tutorials/get-started/install-prerequisites)
-2. Follow the [deployment guide](/docs/tutorials/get-started/deploy-engine)
-3. Explore advanced configuration options

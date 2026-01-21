@@ -15,15 +15,13 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  // UPDATED FOR PERSONAL GITHUB: Change 'YOUR-GITHUB-USERNAME' to your actual username
-  url: 'https://YOUR-GITHUB-USERNAME.github.io',
+  url: 'https://mwdobson3.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/datastage-docs-testing/',
 
   // GitHub pages deployment config.
-  // UPDATED FOR PERSONAL GITHUB: Change 'YOUR-GITHUB-USERNAME' to your actual username
-  organizationName: 'YOUR-GITHUB-USERNAME', // Your GitHub username
+  organizationName: 'mwdobson3', // Your GitHub username
   projectName: 'datastage-docs-testing', // Repo name
 
   onBrokenLinks: 'throw',
@@ -43,9 +41,8 @@ const config: Config = {
         docs: {
           sidebarPath: './sidebars.ts',
           // Edit URL for personal GitHub
-          // UPDATED: Change 'YOUR-GITHUB-USERNAME' to your actual username
           editUrl:
-            'https://github.com/YOUR-GITHUB-USERNAME/datastage-docs-testing/tree/main/',
+            'https://github.com/mwdobson3/datastage-docs-testing/tree/main/',
         },
         blog: false, // Disable blog functionality
         theme: {
@@ -61,11 +58,11 @@ const config: Config = {
     colorMode: {
       respectPrefersColorScheme: true,
     },
-    // Announcement bar for new tutorials
+    // Announcement bar
     announcementBar: {
-      id: 'new_tutorials',
+      id: 'welcome',
       content:
-        '🎉 New tutorial series available! <a href="/docs/tutorials/get-started">Get Started with DataStage Anywhere</a>',
+        '📚 Welcome to DataStage Anywhere Documentation! <a href="/docs/tutorials">Explore Tutorials</a>',
       backgroundColor: '#0f62fe',
       textColor: '#ffffff',
       isCloseable: true,
@@ -90,8 +87,7 @@ const config: Config = {
           label: 'Documentation',
         },
         {
-          // UPDATED: Change 'YOUR-GITHUB-USERNAME' to your actual username
-          href: 'https://github.com/YOUR-GITHUB-USERNAME/datastage-docs-testing',
+          href: 'https://github.com/mwdobson3/datastage-docs-testing',
           label: 'GitHub',
           position: 'right',
         },
@@ -126,9 +122,8 @@ const config: Config = {
           title: 'More',
           items: [
             {
-              // UPDATED: Change 'YOUR-GITHUB-USERNAME' to your actual username
               label: 'GitHub',
-              href: 'https://github.com/YOUR-GITHUB-USERNAME/datastage-docs-testing',
+              href: 'https://github.com/mwdobson3/datastage-docs-testing',
             },
             {
               label: 'IBM Cloud',
