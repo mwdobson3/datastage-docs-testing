@@ -1,0 +1,375 @@
+---
+sidebar_position: 10
+title: Troubleshooting Guide
+description: Common issues and solutions for DataStage Remote Engine deployments
+---
+
+# Troubleshooting Guide
+
+This guide covers common issues you may encounter when deploying and running DataStage Remote Engines, along with their solutions.
+
+:::info Official Documentation
+For the most up-to-date troubleshooting information and additional resources, visit the [official DataStage GitHub repository](https://github.com/IBM/DataStage).
+:::
+
+## Docker/Podman Deployments
+
+### Flow Execution Fails with Incorrect Host or IP Address
+
+**Problem:** Container hosts file contains the host IP address, causing connection issues.
+
+**Solution:**
+
+1. Find the running container:
+   ```bash
+   docker ps
+   # OR
+   podman ps
+   ```
+
+2. Exec into the container as root:
+   ```bash
+   docker exec --user root -it <container-name-or-id> bash
+   # OR
+   podman exec --user root -it <container-name-or-id> bash
+   ```
+
+3. Edit the hosts file:
+   ```bash
+   nano /etc/hosts
+   ```
+
+4. Remove the line containing the IP address of the host and the hostname
+
+5. Save and exit (`Ctrl + X`, then `Y`)
+
+6. Retry the flow
+
+:::warning
+This fix needs to be re-applied whenever the container is removed (e.g., when updating to a new image).
+:::
+
+### Insufficient Storage for Container Image
+
+**Error Message:**
+```
+Error: writing blob: adding layer with blob "sha256:...": unpacking failed 
+(error: exit status 1; output: open /usr/share/zoneinfo/zone.tab: no space left on device)
+```
+
+**Problem:** Not enough space in `/var` directory (Docker/Podman stores container data here by default).
+
+**Recommended:** At least **50 GB** of free space in `/var` for Remote Engine installation.
+
+**Check available storage:**
+```bash
+df -h /var
+```
+
+**Solution 1: Clean up container storage**
+```bash
+docker system prune
+# OR
+podman system prune
+```
+
+:::danger Warning
+This removes all unused images, including manually pulled ones. Use with caution.
+:::
+
+**Solution 2: Mount additional volume**
+
+If you have an additional volume available:
+
+1. Check for unmounted volumes:
+   ```bash
+   lsblk
+   ```
+
+2. Create XFS filesystem:
+   ```bash
+   sudo mkfs.xfs /dev/xvdb  # Replace with your device
+   ```
+
+3. Create mount directory:
+   ```bash
+   sudo mkdir -p /mnt/data
+   ```
+
+4. Mount the volume:
+   ```bash
+   sudo mount /dev/xvdb /mnt/data
+   ```
+
+5. Persist mount after reboot:
+   ```bash
+   echo "/dev/xvdb /mnt/data xfs defaults 0 0" | sudo tee -a /etc/fstab
+   ```
+
+6. Modify storage.conf to use new location (see official docs for details)
+
+### Insufficient subgids/subuids for User Namespace
+
+**Error Message:**
+```
+Error: writing blob: processing tar file(potentially insufficient UIDs or GIDs available 
+in user namespace (requested 1000321001:1000321001 for /home/dsuser)
+```
+
+**Problem:** Rootless Podman requires specific UID ranges in `/etc/subuid` and `/etc/subgid`.
+
+**Solution:**
+
+1. Install shadow-utils:
+   ```bash
+   sudo yum -y install shadow-utils
+   ```
+
+2. Edit `/etc/subuid`:
+   ```bash
+   sudo vi /etc/subuid
+   ```
+   Add:
+   ```
+   <username>:100000:1001321001
+   ```
+
+3. Edit `/etc/subgid`:
+   ```bash
+   sudo vi /etc/subgid
+   ```
+   Add:
+   ```
+   <username>:100000:1001321001
+   ```
+
+4. Apply changes:
+   ```bash
+   podman system migrate
+   ```
+
+### Insufficient CPU and cpuset Permissions
+
+**Error Message:**
+```
+Error: OCI runtime error: crun: the requested cgroup controller `cpu` is not available
+```
+
+**Problem:** Non-root users lack resource limit delegation permissions on systemd-based systems.
+
+**Solution:**
+
+1. Verify current permissions:
+   ```bash
+   cat "/sys/fs/cgroup/user.slice/user-$(id -u).slice/user@$(id -u).service/cgroup.controllers"
+   ```
+
+2. If `cpu` and `cpuset` are missing, create delegate.conf:
+   ```bash
+   sudo mkdir -p /etc/systemd/system/user@.service.d/
+   sudo nano /etc/systemd/system/user@.service.d/delegate.conf
+   ```
+
+3. Add:
+   ```ini
+   [Service]
+   Delegate=memory pids cpu cpuset
+   ```
+
+4. Apply changes:
+   ```bash
+   sudo systemctl daemon-reexec
+   sudo systemctl daemon-reload
+   ```
+
+5. Log out and log back in, then verify:
+   ```bash
+   cat "/sys/fs/cgroup/user.slice/user-$(id -u).slice/user@$(id -u).service/cgroup.controllers"
+   ```
+
+### API Key Changes
+
+**Problem:** IBM Cloud API key has changed and needs to be updated.
+
+**Solution:**
+
+To keep the same remote engine ID:
+
+1. Stop the remote engine container
+2. Remove/delete the remote engine container
+3. Run `dsengine.sh start` again with the new API key
+
+:::tip
+Use the same encryption key (`-e`) and initialization vector (`-i`) to avoid "password missing" errors.
+:::
+
+### Password Missing Errors After Container Restart
+
+**Problem:** Getting "password missing" errors when running flows after stopping, removing, and restarting containers.
+
+**Best Practice:**
+- Use `./dsengine.sh update` to update the remote engine
+- OR use `./dsengine.sh cleanup` to completely remove and start fresh with a new name
+
+**If you must reuse the same container name:**
+- Reuse the same encryption key (`-e`) and initialization vector (`-i`) from the original container
+
+## Kubernetes/OpenShift Deployments
+
+### Pods Stuck Waiting for Certs
+
+**Symptoms:**
+```
+$ kubectl logs testamin01-ibm-datastage-px-compute-0
+Waiting for certs...
+Waiting for certs...
+Waiting for certs...
+```
+
+**Solution:**
+
+1. Log into the shell for either px-runtime or px-compute pod:
+   ```bash
+   kubectl exec -it <pod-name> -- /bin/bash
+   ```
+
+2. Create the certificate file:
+   ```bash
+   touch /opt/ibm/PXService/Server/PXEngine/etc/certs/pxesslcert.p12
+   ```
+
+### API Key Changes
+
+**Problem:** IBM Cloud API key has changed.
+
+**Solution:**
+
+1. Rerun the `launch.sh` script with the updated input file containing the new API key
+2. Restart the px-runtime pod to mount the updated apikey secret:
+   ```bash
+   kubectl delete pod <px-runtime-pod-name>
+   ```
+
+### Insufficient Ephemeral Storage
+
+**Problem:** Worker nodes running out of ephemeral storage.
+
+**Solution:**
+
+Increase ephemeral storage limit (e.g., to 20GB):
+
+```bash
+oc patch pxre <cr-name> --patch '{"spec":{"ephemeralStorageLimit": "20Gi"}}' --type=merge
+```
+
+:::warning
+Don't set the limit higher than available storage on worker nodes, as this can cause stability issues.
+:::
+
+### Temporary Shutdown
+
+**Problem:** Need to temporarily shut down the remote engine without uninstalling.
+
+**Solution:**
+
+Scale down px-runtime and px-compute to 0:
+
+```bash
+oc patch pxre <cr-name> --patch '{"spec":{"shutdown":true}}' --type=merge
+```
+
+To restart, set shutdown to false:
+
+```bash
+oc patch pxre <cr-name> --patch '{"spec":{"shutdown":false}}' --type=merge
+```
+
+## Network and Connectivity Issues
+
+### Verifying URL Allowlisting
+
+**Problem:** Need to verify that required URLs are accessible.
+
+**Solution:**
+
+Use ping to test connectivity:
+
+```bash
+ping api.dataplatform.cloud.ibm.com
+```
+
+Expected output:
+```
+PING api.dataplatform.cloud.ibm.com (172.66.129.176) 56(84) bytes of data.
+64 bytes from 172.66.129.176: icmp_seq=1 ttl=53 time=6.66 ms
+64 bytes from 172.66.129.176: icmp_seq=2 ttl=53 time=6.90 ms
+```
+
+**Required URLs for IBM Cloud:**
+- `icr.io`
+- `iam.cloud.ibm.com`
+- `dataplatform.cloud.ibm.com` and `api.dataplatform.cloud.ibm.com` (Dallas)
+- `eu-de.dataplatform.cloud.ibm.com` and `api.eu-de.dataplatform.cloud.ibm.com` (Frankfurt)
+- `au-syd.dai.cloud.ibm.com` and `api.au-syd.dai.cloud.ibm.com` (Sydney)
+- `ca-tor.dai.cloud.ibm.com` and `api.ca-tor.dai.cloud.ibm.com` (Toronto)
+- `eu-gb.dataplatform.cloud.ibm.com` and `api.eu-gb.dataplatform.cloud.ibm.com` (London)
+- `*.cloud-object-storage.appdomain.cloud`
+
+## General Best Practices
+
+### Extracting Service Logs
+
+**For Docker/Podman:**
+
+```bash
+docker cp {container-id}:/logs - > remoteenginelogs.tar
+# OR
+podman cp {container-id}:/logs - > remoteenginelogs.tar
+```
+
+**Log Locations:**
+- **Container-level logs:** `/var/lib/containers/storage/overlay/...`
+- **Primary Remote Engine logs:** `/logs` (bind-mounted)
+- **Archived logs:** `/ds-storage/service_log_archive` (bind-mounted to `<volume-dir>/ds-storage/service_log_archive`)
+- **WLM logs:** `/px-storage/PXRuntime/WLM/logs/`
+
+### Monitoring Remote Engine Health
+
+**Check pod status (Kubernetes):**
+```bash
+kubectl get pods -n <namespace>
+kubectl logs <pod-name> -n <namespace>
+```
+
+**Check PXRemoteEngine status:**
+```bash
+kubectl get pxre <cr-name> -n <namespace>
+```
+
+Expected output:
+```
+NAME               VERSION   RECONCILED   STATUS      AGE
+remote-engine-01   1.0.2502  1.0.2502     Ready       5m
+```
+
+**Check container status (Docker/Podman):**
+```bash
+docker ps | grep <engine-name>
+docker logs <container-name>
+```
+
+## Getting Help
+
+If you encounter issues not covered in this guide:
+
+1. **Check the official documentation:** [https://github.com/IBM/DataStage](https://github.com/IBM/DataStage)
+2. **Review IBM Think Insights:** [Remote Engine Execution for Data Pipelines](https://www.ibm.com/think/insights/remote-engine-execution-data-pipelines)
+3. **Contact IBM Support:** [https://cloud.ibm.com/unifiedsupport](https://cloud.ibm.com/unifiedsupport)
+4. **Check IBM Documentation:**
+   - [DataStage on IBM Cloud](https://cloud.ibm.com/services/datastage)
+   - [DataStage on Cloud Pak for Data](https://www.ibm.com/docs/en/cloud-paks/cp-data/5.1.x?topic=data-transforming-datastage)
+
+---
+
+**Last Updated:** January 21, 2026  
+**Source:** [IBM DataStage GitHub Repository](https://github.com/IBM/DataStage)
