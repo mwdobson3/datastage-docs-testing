@@ -119,11 +119,11 @@ storage_size=20
 
 Replace these placeholders with your actual values:
 
-| Placeholder | Replace With | Example |
-|------------|--------------|---------|
-| `YOUR_CONTAINER_REGISTRY_API_KEY` | Your IBM Cloud API key | `***REMOVED***` |
-| `YOUR_IBM_CLOUD_API_KEY` | Your IBM Cloud API key (same as above) | `***REMOVED***` |
-| `YOUR_PROJECT_ID` | Your Cloud Pak for Data project ID | `***REMOVED***` |
+| Placeholder | Replace With | Where to Find |
+|------------|--------------|---------------|
+| `YOUR_CONTAINER_REGISTRY_API_KEY` | Your IBM Cloud Container Registry API key | [IBM Cloud API Keys](https://cloud.ibm.com/iam/apikeys) |
+| `YOUR_IBM_CLOUD_API_KEY` | Your IBM Cloud API key (same as above) | [IBM Cloud API Keys](https://cloud.ibm.com/iam/apikeys) |
+| `YOUR_PROJECT_ID` | Your Cloud Pak for Data project ID | Project settings in Cloud Pak for Data |
 
 :::tip
 The Container Registry API key and IBM Cloud API key are typically the same key.
@@ -131,16 +131,16 @@ The Container Registry API key and IBM Cloud API key are typically the same key.
 
 ### Example Completed Configuration
 
-Here's what your completed file should look like:
+Here's what your completed file should look like (with your actual values):
 
 ```ini
 license_accept=true
 data_center=dallas
 namespace=tutorial
 username=iamapikey
-password=***REMOVED***
-api_key=***REMOVED***
-projectId=***REMOVED***
+password=YOUR_ACTUAL_CONTAINER_REGISTRY_API_KEY
+api_key=YOUR_ACTUAL_IBM_CLOUD_API_KEY
+projectId=YOUR_ACTUAL_PROJECT_ID
 name=aws-getting-started-k8s
 size=small
 storage_class=efs-sc
@@ -161,9 +161,9 @@ storage_size=20
 | `license_accept` | Must be `true` to accept license | `true` |
 | `namespace` | Kubernetes namespace for deployment | `tutorial` |
 | `username` | Always `iamapikey` for IBM Cloud | `iamapikey` |
-| `password` | IBM Cloud Container Registry API key | `rmoZA3E...` |
-| `api_key` | IBM Cloud API key | `qSOipvf...` |
-| `projectId` | Cloud Pak for Data project ID | `5343d6a6...` |
+| `password` | IBM Cloud Container Registry API key | Your API key |
+| `api_key` | IBM Cloud API key | Your API key |
+| `projectId` | Cloud Pak for Data project ID | Your project ID |
 | `name` | Remote engine name (alphanumeric) | `aws-getting-started-k8s` |
 | `storage_class` | Kubernetes storage class | `efs-sc` |
 
