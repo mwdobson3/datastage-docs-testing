@@ -43,11 +43,11 @@ Connect to diverse data sources and targets:
 
 ## Getting Started
 
-Ready to get started with DataStage Anywhere?
+Ready to deploy your first DataStage Remote Engine?
 
 <div style={{marginTop: '2rem'}}>
-  <a href="/docs/tutorials" className="button button--primary button--lg">
-    Go to Tutorials →
+  <a href="/datastage-docs-testing/docs/tutorials" className="button button--primary button--lg">
+    View Examples →
   </a>
 </div>
 

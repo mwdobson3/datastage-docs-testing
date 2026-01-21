@@ -1,130 +1,111 @@
 ---
-sidebar_position: 3
-title: Deploy on AWS with Docker
-description: Deploy DataStage Remote Engine on AWS EC2 using Docker
+sidebar_position: 2
+title: AWS EC2 (Docker)
+description: Deploy DataStage Remote Engine on Amazon EC2 with Docker
 ---
 
-import TutorialChecklist from '@site/src/components/TutorialChecklist';
+# Deploy DataStage Remote Engine on AWS EC2 with Docker
 
-# Deploy DataStage Remote Engine on AWS with Docker
+Learn how to deploy a DataStage Remote Engine on Amazon EC2 using Docker to run data integration workloads close to your data sources while maintaining centralized control through IBM Cloud Pak for Data.
 
-Learn how to deploy a DataStage Remote Engine on an AWS EC2 instance using Docker. This tutorial walks you through setting up a complete Docker-based remote engine environment connected to IBM Cloud Pak for Data.
+## Why Deploy with Docker?
 
-<a href="/docs/tutorials/aws-docker-engine/prerequisites" className="start-tutorial-btn">
-  Start Tutorial
-</a>
+Docker provides a lightweight, portable containerization solution for DataStage engines with:
 
-## What You'll Learn
-
-In this tutorial series, you'll learn how to:
-
-- ✅ Set up an AWS EC2 instance with proper storage configuration
-- ✅ Install and configure Docker on RHEL 9
-- ✅ Configure secondary storage for Docker containers
-- ✅ Generate encryption keys for secure communication
-- ✅ Deploy the DataStage Remote Engine container
-- ✅ Connect and verify the engine in IBM Cloud
-
-## Tutorial Path
-
-<TutorialChecklist 
-  collectionId="aws-docker-engine"
-  tutorials={[
-    {
-      id: 'prerequisites',
-      title: 'Prerequisites and Setup',
-      duration: '10 min',
-      path: '/docs/tutorials/aws-docker-engine/prerequisites'
-    },
-    {
-      id: 'launch-ec2',
-      title: 'Launch and Configure EC2 Instance',
-      duration: '15 min',
-      path: '/docs/tutorials/aws-docker-engine/launch-ec2'
-    },
-    {
-      id: 'install-docker',
-      title: 'Install Docker and Configure Storage',
-      duration: '20 min',
-      path: '/docs/tutorials/aws-docker-engine/install-docker'
-    },
-    {
-      id: 'generate-keys',
-      title: 'Generate Encryption Keys',
-      duration: '5 min',
-      path: '/docs/tutorials/aws-docker-engine/generate-keys'
-    },
-    {
-      id: 'deploy-engine',
-      title: 'Deploy Remote Engine',
-      duration: '10 min',
-      path: '/docs/tutorials/aws-docker-engine/deploy-engine'
-    },
-    {
-      id: 'verify-configure',
-      title: 'Verify and Configure in IBM Cloud',
-      duration: '5 min',
-      path: '/docs/tutorials/aws-docker-engine/verify-configure'
-    }
-  ]}
-/>
-
-## Prerequisites
-
-Before starting this tutorial, ensure you have:
-
-- **AWS Account** - With permissions to create EC2 instances
-- **IBM Cloud Account** - With access to Cloud Pak for Data
-- **IBM Cloud API Key** - For authentication
-- **SSH Client** - Terminal access on your local machine
-- **Basic Linux Knowledge** - Familiarity with command-line operations
-
-:::tip Estimated Time
-The complete tutorial series takes approximately **65 minutes** to complete.
-:::
+- **Simplicity**: Single-server deployment with minimal infrastructure
+- **Quick Setup**: Faster deployment compared to Kubernetes
+- **Cost-Effective**: Ideal for development, testing, or smaller workloads
+- **Portability**: Consistent environment across different platforms
+- **Easy Management**: Simple start/stop/restart operations
 
 ## Architecture Overview
 
-This deployment creates a Docker-based DataStage Remote Engine on AWS:
+<div style={{textAlign: 'center', margin: '2rem 0'}}>
+  <img 
+    src="/datastage-docs-testing/img/datastage-anywhere-architecture.png" 
+    alt="DataStage as a Service Anywhere Architecture" 
+    style={{maxWidth: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)'}}
+  />
+</div>
 
-```
-┌─────────────────────────────────────┐
-│   IBM Cloud Pak for Data            │
-│   (Control Plane)                   │
-│   - Job Design & Management         │
-│   - Monitoring Dashboard            │
-└──────────────┬──────────────────────┘
-               │
-               │ HTTPS/Secure Connection
-               │
-┌──────────────▼──────────────────────┐
-│   AWS EC2 Instance (RHEL 9)         │
-│   ┌─────────────────────────────┐   │
-│   │  Docker Engine              │   │
-│   │  ┌─────────────────────┐    │   │
-│   │  │ DataStage Remote    │    │   │
-│   │  │ Engine Container    │    │   │
-│   │  └─────────────────────┘    │   │
-│   └─────────────────────────────┘   │
-│                                     │
-│   Secondary Storage: /mnt/data      │
-│   (100 GB for container images)     │
-└─────────────────────────────────────┘
-```
+### Key Components
 
-## Key Features
+**Design-time on IBM Cloud**
+- Manage projects and user access
+- Design DataStage jobs using the web-based canvas
+- Import existing DataStage assets
+- Administrative tools and monitoring
 
-- **Isolated Environment**: Dedicated EC2 instance for your remote engine
-- **Scalable Storage**: Secondary disk for container images and data
-- **Secure Communication**: Encrypted connection to IBM Cloud
-- **Easy Management**: Docker-based deployment for simple updates
+**DataStage Runtime Execution**
+- Initiates API calls to remote engine
+- Pulls job metadata and orchestrates execution
+- Firewall allows only outbound connections for security
 
-## Need Help?
+**Remote Engine (On EC2 Instance)**
+- **PX Runtime (Conductor)**: Orchestrates parallel job execution
+- **PX Compute**: Parallel processing containers for data transformation
+- **Persistent Volume**: Stores engine configuration and temporary data
+- Deployed as Docker containers on a single EC2 instance
 
-- 📚 [Documentation Home](/docs/intro)
-- 💬 [IBM Community](https://community.ibm.com/community/user/datamanagement/)
-- 🐛 [Report Issues](https://github.com/mwdobson3/datastage-docs-testing/issues)
+### Benefits
+
+✅ **Retain full data privacy** - Data never leaves your environment  
+✅ **Reduce egress/ingress fines** - Minimize unnecessary data movement  
+✅ **Improved performance** - Process data where it resides  
+✅ **Retain data sovereignty** - Comply with data locality regulations
+
+## When to Use Docker vs. Kubernetes
+
+**Choose Docker when:**
+- Running development or test environments
+- Processing smaller data volumes
+- Need quick setup with minimal infrastructure
+- Single-server deployment is sufficient
+- Cost optimization is a priority
+
+**Choose Kubernetes when:**
+- Running production workloads at scale
+- Need high availability and auto-scaling
+- Processing large data volumes
+- Require multi-tenancy and resource isolation
+- Enterprise-grade orchestration is required
+
+## What You'll Learn
+
+This tutorial walks you through:
+
+1. **Prerequisites and Setup** - Required tools and access
+2. **Launch EC2 Instance** - Create and configure AWS instance
+3. **Install Docker** - Set up Docker with secondary storage
+4. **Generate Encryption Keys** - Create security credentials
+5. **Deploy Remote Engine** - Install DataStage with Docker
+6. **Verify and Configure** - Test deployment and connect to Cloud Pak
+
+## Prerequisites
+
+Before starting, ensure you have:
+
+- AWS account with EC2 permissions
+- IBM Cloud Pak for Data instance (SaaS or on-premises)
+- Basic knowledge of Linux and Docker
+- SSH client for remote access
+
+## Time Estimate
+
+⏱️ **Total Time**: 30-45 minutes
+
+- EC2 setup: 10-15 minutes
+- Docker installation: 5-10 minutes  
+- Engine deployment: 10-15 minutes
+- Verification: 5-10 minutes
 
 ---
 
-Ready to get started? Click the button above or proceed to [Prerequisites and Setup](/docs/tutorials/aws-docker-engine/prerequisites).
+<div style={{textAlign: 'center', margin: '3rem 0'}}>
+  <a 
+    href="/datastage-docs-testing/docs/tutorials/aws-docker-engine/prerequisites" 
+    className="button button--primary button--lg"
+  >
+    Start Tutorial →
+  </a>
+</div>
