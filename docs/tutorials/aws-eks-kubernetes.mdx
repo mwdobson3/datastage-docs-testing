@@ -1,152 +1,95 @@
 ---
-sidebar_position: 2
-title: Deploy on AWS EKS with Kubernetes
-description: Deploy DataStage Remote Engine on AWS EKS using Kubernetes
+sidebar_position: 1
+title: AWS EKS (Kubernetes)
+description: Deploy DataStage Remote Engine on Amazon EKS
 ---
 
-import TutorialChecklist from '@site/src/components/TutorialChecklist';
+# Deploy DataStage Remote Engine on AWS EKS
 
-# Deploy DataStage Remote Engine on AWS EKS with Kubernetes
+Learn how to deploy a DataStage Remote Engine on Amazon Elastic Kubernetes Service (EKS) to run data integration workloads close to your data sources while maintaining centralized control through IBM Cloud Pak for Data.
 
-Learn how to deploy a DataStage Remote Engine on Amazon Elastic Kubernetes Service (EKS). This tutorial walks you through deploying a production-ready Remote Engine using Kubernetes orchestration.
+## Why Deploy on Kubernetes?
 
-<a href="/docs/tutorials/aws-eks-kubernetes/prerequisites" className="start-tutorial-btn">
-  Start Tutorial
-</a>
+Kubernetes provides enterprise-grade orchestration for containerized DataStage engines with:
 
-## What You'll Learn
-
-In this tutorial series, you'll learn how to:
-
-- ✅ Provision an AWS EKS cluster (or use existing)
-- ✅ Configure kubectl to access your EKS cluster
-- ✅ Prepare the DataStage Remote Engine configuration
-- ✅ Deploy the Remote Engine using Kubernetes operators
-- ✅ Monitor pod deployment and health
-- ✅ Verify and configure the engine in IBM Cloud
-
-## Tutorial Path
-
-<TutorialChecklist 
-  collectionId="aws-eks-kubernetes"
-  tutorials={[
-    {
-      id: 'prerequisites',
-      title: 'Prerequisites and Setup',
-      duration: '10 min',
-      path: '/docs/tutorials/aws-eks-kubernetes/prerequisites'
-    },
-    {
-      id: 'provision-eks',
-      title: 'Provision EKS Cluster',
-      duration: '15 min',
-      path: '/docs/tutorials/aws-eks-kubernetes/provision-eks'
-    },
-    {
-      id: 'configure-kubectl',
-      title: 'Configure kubectl Access',
-      duration: '5 min',
-      path: '/docs/tutorials/aws-eks-kubernetes/configure-kubectl'
-    },
-    {
-      id: 'prepare-config',
-      title: 'Prepare Configuration File',
-      duration: '10 min',
-      path: '/docs/tutorials/aws-eks-kubernetes/prepare-config'
-    },
-    {
-      id: 'deploy-engine',
-      title: 'Deploy Remote Engine',
-      duration: '10 min',
-      path: '/docs/tutorials/aws-eks-kubernetes/deploy-engine'
-    },
-    {
-      id: 'monitor-verify',
-      title: 'Monitor and Verify Deployment',
-      duration: '10 min',
-      path: '/docs/tutorials/aws-eks-kubernetes/monitor-verify'
-    }
-  ]}
-/>
-
-## Prerequisites
-
-Before starting this tutorial, ensure you have:
-
-- **AWS Account** - With permissions to create/access EKS clusters
-- **IBM Cloud Account** - With access to Cloud Pak for Data
-- **kubectl** - Kubernetes command-line tool installed
-- **AWS CLI** - For EKS cluster access configuration
-- **IBM Cloud API Key** - For authentication
-- **Basic Kubernetes Knowledge** - Understanding of pods, deployments, namespaces
-
-:::tip For IBMers
-You can use [IBM TechZone](https://techzone.ibm.com/) to provision a pre-configured EKS cluster for testing.
-:::
-
-:::tip Estimated Time
-The complete tutorial series takes approximately **60 minutes** to complete.
-:::
+- **High Availability**: Automatic pod rescheduling and self-healing
+- **Scalability**: Dynamic resource allocation based on workload demands
+- **Resource Efficiency**: Optimal utilization of compute resources
+- **Enterprise Security**: Network policies, RBAC, and secrets management
+- **Multi-tenancy**: Run multiple engines in isolated namespaces
 
 ## Architecture Overview
 
-This deployment creates a Kubernetes-based DataStage Remote Engine on AWS EKS:
+<div style={{textAlign: 'center', margin: '2rem 0'}}>
+  <img 
+    src="/datastage-docs-testing/img/datastage-anywhere-architecture.png" 
+    alt="DataStage as a Service Anywhere Architecture" 
+    style={{maxWidth: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)'}}
+  />
+</div>
 
-```
-┌─────────────────────────────────────┐
-│   IBM Cloud Pak for Data            │
-│   (Control Plane)                   │
-│   - Job Design & Management         │
-│   - Monitoring Dashboard            │
-└──────────────┬──────────────────────┘
-               │
-               │ HTTPS/Secure Connection
-               │
-┌──────────────▼──────────────────────┐
-│   AWS EKS Cluster                   │
-│   ┌─────────────────────────────┐   │
-│   │  Namespace: tutorial        │   │
-│   │  ┌─────────────────────┐    │   │
-│   │  │ DataStage Operator  │    │   │
-│   │  └─────────────────────┘    │   │
-│   │  ┌─────────────────────┐    │   │
-│   │  │ PX Runtime Pod      │    │   │
-│   │  └─────────────────────┘    │   │
-│   │  ┌─────────────────────┐    │   │
-│   │  │ PX Compute Pods (2) │    │   │
-│   │  └─────────────────────┘    │   │
-│   └─────────────────────────────┘   │
-│                                     │
-│   EFS Storage (Persistent Volumes)  │
-└─────────────────────────────────────┘
-```
+### Key Components
 
-## Key Features
+**Design-time on IBM Cloud**
+- Manage projects and user access
+- Design DataStage jobs using the web-based canvas
+- Import existing DataStage assets
+- Administrative tools and monitoring
 
-- **Managed Kubernetes**: AWS handles cluster management and scaling
-- **High Availability**: Multiple compute pods for workload distribution
-- **Persistent Storage**: EFS integration for data persistence
-- **Auto-scaling**: Kubernetes-native scaling capabilities
-- **Production Ready**: Enterprise-grade deployment architecture
+**DataStage Runtime Execution**
+- Initiates API calls to remote engine
+- Pulls job metadata and orchestrates execution
+- Firewall allows only outbound connections for security
 
-## Comparison: EKS vs Docker
+**Remote Engine (On-premises or Client VPC)**
+- **PX Runtime (Conductor)**: Orchestrates parallel job execution
+- **PX Compute**: Parallel processing containers for data transformation
+- **Persistent Volume**: Stores engine configuration and temporary data
+- Deployed on Docker or Kubernetes infrastructure
 
-| Feature | AWS EKS (Kubernetes) | AWS EC2 (Docker) |
-|---------|---------------------|------------------|
-| **Complexity** | Higher | Lower |
-| **Scalability** | Automatic | Manual |
-| **High Availability** | Built-in | Requires setup |
-| **Management** | AWS managed | Self-managed |
-| **Cost** | Higher (cluster costs) | Lower (single VM) |
-| **Best For** | Production workloads | Development/Testing |
+### Benefits
 
-## Need Help?
+✅ **Retain full data privacy** - Data never leaves your environment  
+✅ **Reduce egress/ingress fines** - Minimize unnecessary data movement  
+✅ **Improved performance** - Process data where it resides  
+✅ **Retain data sovereignty** - Comply with data locality regulations
 
-- 📚 [Documentation Home](/docs/intro)
-- 💬 [IBM Community](https://community.ibm.com/community/user/datamanagement/)
-- 🐛 [Report Issues](https://github.com/mwdobson3/datastage-docs-testing/issues)
-- 📖 [DataStage on Kubernetes GitHub](https://github.com/IBM/DataStage/tree/main/RemoteEngine/kubernetes)
+## What You'll Learn
+
+This tutorial walks you through:
+
+1. **Prerequisites and Setup** - Required tools and access
+2. **Provision EKS Cluster** - Create Kubernetes cluster on AWS
+3. **Configure kubectl Access** - Connect to your EKS cluster
+4. **Prepare Configuration** - Set up engine parameters
+5. **Deploy Remote Engine** - Install DataStage on EKS
+6. **Monitor and Verify** - Ensure successful deployment
+
+## Prerequisites
+
+Before starting, ensure you have:
+
+- AWS account with EKS permissions
+- IBM Cloud Pak for Data instance (SaaS or on-premises)
+- Basic knowledge of Kubernetes and AWS
+- Command-line tools: `kubectl`, `aws-cli`
+
+## Time Estimate
+
+⏱️ **Total Time**: 45-60 minutes
+
+- Cluster provisioning: 15-20 minutes
+- Configuration: 10-15 minutes  
+- Deployment: 15-20 minutes
+- Verification: 5-10 minutes
 
 ---
 
-Ready to get started? Click the button above or proceed to [Prerequisites and Setup](/docs/tutorials/aws-eks-kubernetes/prerequisites).
+<div style={{textAlign: 'center', margin: '3rem 0'}}>
+  <a 
+    href="/datastage-docs-testing/docs/tutorials/aws-eks-kubernetes/prerequisites" 
+    className="button button--primary button--lg"
+  >
+    Start Tutorial →
+  </a>
+</div>

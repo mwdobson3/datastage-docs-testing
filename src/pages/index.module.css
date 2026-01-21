@@ -4,15 +4,57 @@
  */
 
 .heroBanner {
-  padding: 4rem 0;
+  padding: 6rem 2rem;
   text-align: center;
   position: relative;
   overflow: hidden;
+  background: linear-gradient(135deg, #0f62fe 0%, #0353e9 100%);
+  color: white;
+}
+
+[data-theme='dark'] .heroBanner {
+  background: linear-gradient(135deg, #0353e9 0%, #012d9c 100%);
+}
+
+.heroTitle {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: white !important;
+  line-height: 1.2;
+}
+
+.heroSubtitle {
+  font-size: 1.75rem;
+  font-weight: 400;
+  margin-bottom: 1rem;
+  color: #d0e2ff;
+  line-height: 1.4;
+}
+
+.heroDescription {
+  font-size: 1.125rem;
+  max-width: 800px;
+  margin: 0 auto 2.5rem;
+  color: #edf5ff;
+  line-height: 1.6;
 }
 
 @media screen and (max-width: 996px) {
   .heroBanner {
-    padding: 2rem;
+    padding: 4rem 1rem;
+  }
+  
+  .heroTitle {
+    font-size: 2.5rem;
+  }
+  
+  .heroSubtitle {
+    font-size: 1.5rem;
+  }
+  
+  .heroDescription {
+    font-size: 1rem;
   }
 }
 
@@ -20,4 +62,171 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
+
+.buttons .button {
+  font-weight: 600;
+  padding: 0.875rem 2rem;
+  font-size: 1.125rem;
+}
+
+/* Architecture Section */
+.architectureSection {
+  padding: 4rem 2rem;
+  background-color: var(--ifm-background-color);
+}
+
+.sectionTitle {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 3rem;
+  color: var(--ifm-color-primary);
+}
+
+.architectureContainer {
+  max-width: 1200px;
+  margin: 0 auto 2rem;
+  padding: 2rem;
+  background: var(--ifm-color-emphasis-100);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='dark'] .architectureContainer {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.architectureImage {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  display: block;
+}
+
+.architectureDescription {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+  font-size: 1.125rem;
+  color: var(--ifm-color-emphasis-700);
+  line-height: 1.6;
+}
+
+/* Features Section */
+.features {
+  padding: 4rem 2rem;
+  background: linear-gradient(180deg, var(--ifm-background-color) 0%, var(--ifm-color-emphasis-100) 100%);
+}
+
+.featureCard {
+  padding: 2rem;
+  height: 100%;
+  text-align: center;
+  background: var(--ifm-background-color);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.featureCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 16px rgba(15, 98, 254, 0.2);
+}
+
+[data-theme='dark'] .featureCard {
+  background: var(--ifm-color-emphasis-100);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='dark'] .featureCard:hover {
+  box-shadow: 0 4px 16px rgba(120, 169, 255, 0.3);
+}
+
+.featureIcon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.featureCard h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--ifm-color-primary);
+}
+
+.featureCard p {
+  font-size: 1rem;
+  color: var(--ifm-color-emphasis-700);
+  line-height: 1.5;
+}
+
+/* Deployment Options Section */
+.deploymentSection {
+  padding: 4rem 2rem;
+  background-color: var(--ifm-background-color);
+}
+
+.deploymentCard {
+  padding: 2.5rem;
+  height: 100%;
+  background: var(--ifm-color-emphasis-100);
+  border-radius: 12px;
+  border-left: 4px solid var(--ifm-color-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.deploymentCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(15, 98, 254, 0.2);
+}
+
+[data-theme='dark'] .deploymentCard {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='dark'] .deploymentCard:hover {
+  box-shadow: 0 6px 20px rgba(120, 169, 255, 0.3);
+}
+
+.deploymentCard h3 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--ifm-color-primary);
+}
+
+.deploymentCard p {
+  font-size: 1.125rem;
+  margin-bottom: 1.5rem;
+  color: var(--ifm-color-emphasis-700);
+  font-weight: 500;
+}
+
+.deploymentCard ul {
+  margin-bottom: 2rem;
+  padding-left: 1.5rem;
+}
+
+.deploymentCard li {
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+  color: var(--ifm-color-emphasis-700);
+  line-height: 1.5;
+}
+
+.deploymentCard .button {
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+}
+
+@media screen and (max-width: 996px) {
+  .deploymentCard {
+    margin-bottom: 2rem;
+  }
+}
+
+/* Made with Bob */
