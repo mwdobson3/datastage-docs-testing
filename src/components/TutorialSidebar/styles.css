@@ -1,0 +1,163 @@
+.tutorial-sidebar {
+  position: sticky;
+  top: calc(var(--ifm-navbar-height) + 1rem);
+  padding: 1.5rem;
+  background: var(--ifm-color-emphasis-100);
+  border-radius: 8px;
+  border-left: 4px solid var(--ifm-color-primary);
+  margin-bottom: 2rem;
+  max-height: calc(100vh - var(--ifm-navbar-height) - 2rem);
+  overflow-y: auto;
+}
+
+.tutorial-sidebar-header {
+  margin-bottom: 1.5rem;
+}
+
+.tutorial-sidebar-header h4 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--ifm-color-primary);
+}
+
+.tutorial-sidebar-progress {
+  margin-bottom: 0.5rem;
+}
+
+.tutorial-sidebar-progress .progress-bar-track {
+  height: 6px;
+  background-color: var(--ifm-color-emphasis-300);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.tutorial-sidebar-progress .progress-bar-fill {
+  height: 100%;
+  background-color: var(--ifm-color-primary);
+  transition: width 0.3s ease;
+}
+
+.tutorial-sidebar-progress .progress-text {
+  font-size: 0.875rem;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.tutorial-sidebar-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem 0;
+}
+
+.tutorial-sidebar-step {
+  margin-bottom: 0.5rem;
+}
+
+.tutorial-sidebar-link {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  border-radius: 4px;
+  text-decoration: none;
+  color: var(--ifm-font-color-base);
+  transition: background-color 0.2s;
+}
+
+.tutorial-sidebar-link:hover {
+  background-color: var(--ifm-color-emphasis-200);
+  text-decoration: none;
+  color: var(--ifm-color-primary);
+}
+
+.tutorial-sidebar-step.current .tutorial-sidebar-link {
+  background-color: var(--ifm-color-primary-lightest);
+  font-weight: 600;
+}
+
+.tutorial-sidebar-step.completed .tutorial-sidebar-link {
+  opacity: 0.8;
+}
+
+.step-indicator {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  background-color: var(--ifm-color-emphasis-200);
+  color: var(--ifm-color-emphasis-700);
+}
+
+.tutorial-sidebar-step.completed .step-indicator {
+  background-color: var(--ifm-color-primary);
+  color: white;
+}
+
+.tutorial-sidebar-step.current .step-indicator {
+  background-color: var(--ifm-color-primary);
+  color: white;
+  box-shadow: 0 0 0 3px var(--ifm-color-primary-lightest);
+}
+
+.step-check {
+  font-size: 1rem;
+}
+
+.step-number {
+  font-size: 0.875rem;
+}
+
+.step-title {
+  flex: 1;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.tutorial-sidebar-complete {
+  padding: 1rem;
+  background-color: #24a148;
+  color: white;
+  border-radius: 4px;
+  text-align: center;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+[data-theme='dark'] .tutorial-sidebar-complete {
+  background-color: #198038;
+}
+
+.tutorial-sidebar-next {
+  display: block;
+  padding: 0.75rem 1rem;
+  background-color: var(--ifm-color-primary);
+  color: white !important;
+  border-radius: 4px;
+  text-align: center;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.tutorial-sidebar-next:hover {
+  background-color: var(--ifm-color-primary-dark);
+  text-decoration: none;
+  color: white !important;
+}
+
+/* Responsive: hide on mobile, show on desktop */
+@media (max-width: 996px) {
+  .tutorial-sidebar {
+    position: relative;
+    top: 0;
+    max-height: none;
+  }
+}
+
+/* Made with Bob */
